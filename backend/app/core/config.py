@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30  # reduced from 60 for tighter security
 
     # --- CORS ---
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "https://repen-india.vercel.app,http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500"
 
     # --- App ---
     app_env: str = "development"
