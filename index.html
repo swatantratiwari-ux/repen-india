@@ -52,6 +52,8 @@
     <meta name="description"
         content="RePen India partners with institutions across India to collect and responsibly recycle used pens, reducing plastic waste one pen at a time.">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         /* ============================================================
    CSS CUSTOM PROPERTIES
@@ -66,8 +68,286 @@
             --text-muted: #94a3b8;
             --border-subtle: rgba(255, 255, 255, 0.08);
             --glass-bg: rgba(56, 189, 248, 0.05);
-            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-stack: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'Syne', sans-serif;
             --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --nav-height: 68px;
+        }
+
+        /* ============================================================
+   NAVBAR
+   ============================================================ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 900;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .navbar.scrolled {
+            background: rgba(11, 17, 32, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Logo */
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: none;
+        }
+
+        .navbar-logo-icon {
+            width: 34px;
+            height: 34px;
+            background: var(--accent-gradient);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .navbar-logo-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: #0b1120;
+        }
+
+        .navbar-logo-text {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .navbar-logo-text span {
+            color: var(--accent-primary);
+        }
+
+        /* Nav links */
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            list-style: none;
+        }
+
+        .navbar-links a {
+            display: block;
+            padding: 7px 14px;
+            font-family: var(--font-stack);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: color 0.2s ease, background 0.2s ease;
+            cursor: none;
+            letter-spacing: 0.01em;
+        }
+
+        .navbar-links a:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* CTA button in navbar */
+        .navbar-cta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-cta a.nav-btn {
+            padding: 9px 20px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: none;
+            letter-spacing: 0.01em;
+        }
+
+        .navbar-cta a.nav-btn-ghost {
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .navbar-cta a.nav-btn-ghost:hover {
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .navbar-cta a.nav-btn-solid {
+            background: var(--accent-gradient);
+            color: #0b1120;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+        }
+
+        .navbar-cta a.nav-btn-solid:hover {
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.45);
+            transform: translateY(-1px);
+        }
+
+        /* Hamburger for mobile */
+        .navbar-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .navbar-hamburger:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .navbar-hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-hamburger.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .navbar-hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .navbar-hamburger.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* Mobile menu */
+        .navbar-mobile {
+            display: none;
+            position: fixed;
+            top: var(--nav-height);
+            left: 0;
+            right: 0;
+            background: rgba(11, 17, 32, 0.97);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 16px 24px 24px;
+            z-index: 899;
+            transform: translateY(-10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .navbar-mobile.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .navbar-mobile a {
+            display: block;
+            padding: 12px 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-subtle);
+            transition: color 0.2s;
+            cursor: none;
+        }
+
+        .navbar-mobile a:last-child {
+            border-bottom: none;
+        }
+
+        .navbar-mobile a:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar-mobile .mob-cta {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .navbar-mobile .mob-cta a {
+            flex: 1;
+            text-align: center;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+        }
+
+        .navbar-mobile .mob-cta a.mob-ghost {
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+        }
+
+        .navbar-mobile .mob-cta a.mob-solid {
+            background: var(--accent-gradient);
+            color: #0b1120;
+        }
+
+        /* Offset sections for fixed navbar */
+        html {
+            scroll-padding-top: var(--nav-height);
+        }
+
+        body {
+            padding-top: var(--nav-height);
+        }
+
+        @media (max-width: 860px) {
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .navbar-links,
+            .navbar-cta {
+                display: none;
+            }
+
+            .navbar-hamburger {
+                display: flex;
+            }
+
+            .navbar-mobile {
+                display: block;
+            }
         }
 
         /* ============================================================
@@ -93,6 +373,7 @@
             line-height: 1.7;
             overflow-x: hidden;
             cursor: none;
+            padding-top: var(--nav-height);
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200' opacity='0.03'%3E%3Cg fill='none' stroke='%2338bdf8' stroke-width='1.5'%3E%3Cpath d='M100 30 L130 75 L100 65 L70 75 Z'/%3E%3Cpath d='M130 75 L145 130 L115 115 L100 65 Z'/%3E%3Cpath d='M70 75 L100 65 L85 115 L55 130 Z'/%3E%3Cpath d='M100 65 L115 115 L100 140 L85 115 Z'/%3E%3Cpolygon points='100,155 110,170 90,170'/%3E%3Cpath d='M75 170 L125 170' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
         }
 
@@ -828,6 +1109,54 @@
     <div class="cursor" id="cursor" aria-hidden="true"></div>
 
     <!-- ============================================================
+     TOP NAVBAR
+     ============================================================ -->
+    <header class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <!-- Logo -->
+            <a href="#hero" class="navbar-logo" aria-label="RePen India Home">
+                <div class="navbar-logo-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C8 2 5 5 5 9c0 5.5 7 13 7 13s7-7.5 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/>
+                    </svg>
+                </div>
+                <span class="navbar-logo-text">Re<span>Pen</span> India</span>
+            </a>
+
+            <!-- Desktop Links -->
+            <ul class="navbar-links" role="list">
+                <li><a href="#info">The Problem</a></li>
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#why">Why RePen</a></li>
+            </ul>
+
+            <!-- Desktop CTA -->
+            <div class="navbar-cta">
+                <a href="#login" class="nav-btn nav-btn-ghost">Sign In</a>
+                <a href="#register" class="nav-btn nav-btn-solid magnetic">Register</a>
+            </div>
+
+            <!-- Hamburger (mobile) -->
+            <button class="navbar-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <nav class="navbar-mobile" id="mobile-menu" aria-label="Mobile navigation">
+        <a href="#info" class="mob-link">The Problem</a>
+        <a href="#how" class="mob-link">How It Works</a>
+        <a href="#why" class="mob-link">Why RePen</a>
+        <div class="mob-cta">
+            <a href="#login" class="mob-ghost">Sign In</a>
+            <a href="#register" class="mob-solid">Register</a>
+        </div>
+    </nav>
+
+    <!-- ============================================================
      HERO SECTION
      ============================================================ -->
     <section class="hero" id="hero">
@@ -1184,16 +1513,19 @@
      ============================================================ -->
     <footer>
         <div class="container">
-            <p>RePen India &nbsp;·&nbsp; <a href="mailto:contact@repenIndia.in">contact@repenindia.in</a></p>
-            <p
-                style="margin-top:8px;font-size:0.78rem;opacity:0.6;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <p>RePen India &nbsp;·&nbsp; <a href="mailto:swatantratiwari913@gmail.com">swatantratiwari913@gmail.com</a></p>
+            <p style="margin-top:8px;font-size:0.78rem;opacity:0.6;display:flex;align-items:center;justify-content:center;gap:8px;">
                 Made with ❤️ by Swatantra <a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank"
                     rel="noopener noreferrer" title="LinkedIn" style="display:inline-flex;align-items:center;"><svg
                         xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                         fill="currentColor">
                         <path
                             d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                    </svg></a></p>
+                    </svg></a>
+            </p>
+            <p style="margin-top:10px;font-size:0.75rem;opacity:0.5;">
+                &copy; 2025 RePen India. All Rights Reserved.
+            </p>
         </div>
     </footer>
 
@@ -1922,6 +2254,42 @@
             })();
 
         })();
+
+        /* ==========================================================
+           NAVBAR — SCROLL EFFECT + HAMBURGER
+           ========================================================== */
+        (function () {
+            var navbar = document.getElementById('navbar');
+            var hamburger = document.getElementById('hamburger');
+            var mobileMenu = document.getElementById('mobile-menu');
+            var mobLinks = document.querySelectorAll('.mob-link, .mob-cta a');
+
+            // Scroll: add .scrolled class after 20px
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }, { passive: true });
+
+            // Hamburger toggle
+            hamburger.addEventListener('click', function () {
+                var isOpen = mobileMenu.classList.toggle('open');
+                hamburger.classList.toggle('open', isOpen);
+                hamburger.setAttribute('aria-expanded', isOpen);
+            });
+
+            // Close mobile menu on link click
+            mobLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    mobileMenu.classList.remove('open');
+                    hamburger.classList.remove('open');
+                    hamburger.setAttribute('aria-expanded', 'false');
+                });
+            });
+        })();
+
     </script>
 
 </body>
