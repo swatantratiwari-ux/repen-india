@@ -1,2297 +1,2168 @@
-<!--
-  ============================================================
-  RePen India — Pen Recycling Landing Page
-  ============================================================
-
-  1. COLOR SYSTEM LOGIC
-     All colors derive from a midnight navy + warm amber palette.
-     --bg-primary/#0a0e1a is the deepest midnight layer;
-     --bg-secondary/#111827 provides alternating sections.
-     --accent-primary/#d4915c and --accent-soft/#e8a87c are
-     warm amber tones for buttons, focus rings, highlights.
-     --accent-gradient is a 135° gradient between both accents.
-     Body has a repeating SVG recycling-symbol pattern.
-     Text uses --text-primary/#f1f0ee (warm off-white)
-     and --text-muted/#9ca3af for secondary copy.
-
-  2. CURSOR ANIMATION LOGIC
-     A custom circular cursor div follows the pointer via
-     requestAnimationFrame. Position is interpolated each
-     frame using linear interpolation (lerp) with factor 0.15
-     for smooth trailing. On hover over interactive elements
-     (a, button, input, select, [role="tab"]) the cursor
-     scales up and changes border-color. Touch devices are
-     detected via matchMedia('(pointer: coarse)') and the
-     custom cursor is disabled entirely.
-
-  3. TAB SWITCHING ANIMATION LOGIC
-     Tabs use aria-selected and role="tab"/"tabpanel". On
-     click, the active panel fades out (opacity 0, translateY
-     8px) over 250ms, then the new panel fades in. An
-     underline indicator div slides horizontally via
-     transform: translateX() to sit beneath the active tab.
-
-  4. PERFORMANCE CONSIDERATIONS
-     - DOM selectors are cached outside loops.
-     - IntersectionObserver handles scroll-triggered fade-ins
-       (no scroll event listeners).
-     - will-change is applied only to the cursor element.
-     - Magnetic button effect uses cached bounding rects.
-     - Event delegation is used for tab switching.
-     - requestAnimationFrame loop exits early when cursor
-       position hasn't changed (within 0.5px threshold).
-  ============================================================
--->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RePen India — Responsible Pen Recycling</title>
-    <meta name="description"
-        content="RePen India partners with institutions across India to collect and responsibly recycle used pens, reducing plastic waste one pen at a time.">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* ============================================================
-   CSS CUSTOM PROPERTIES
-   ============================================================ */
-        :root {
-            --bg-primary: #0b1120;
-            --bg-secondary: #111c33;
-            --accent-primary: #38bdf8;
-            --accent-soft: #7dd3fc;
-            --accent-gradient: linear-gradient(135deg, #38bdf8, #7dd3fc);
-            --text-primary: #f0f4f8;
-            --text-muted: #94a3b8;
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --glass-bg: rgba(56, 189, 248, 0.05);
-            --font-stack: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-display: 'Syne', sans-serif;
-            --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            --nav-height: 68px;
-        }
-
-        /* ============================================================
-   NAVBAR
-   ============================================================ */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 900;
-            height: var(--nav-height);
-            display: flex;
-            align-items: center;
-            padding: 0 40px;
-            transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-            border-bottom: 1px solid transparent;
-        }
-
-        .navbar.scrolled {
-            background: rgba(11, 17, 32, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-subtle);
-            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .navbar-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Logo */
-        .navbar-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            cursor: none;
-        }
-
-        .navbar-logo-icon {
-            width: 34px;
-            height: 34px;
-            background: var(--accent-gradient);
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .navbar-logo-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: #0b1120;
-        }
-
-        .navbar-logo-text {
-            font-family: var(--font-display);
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.02em;
-            line-height: 1;
-        }
-
-        .navbar-logo-text span {
-            color: var(--accent-primary);
-        }
-
-        /* Nav links */
-        .navbar-links {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            list-style: none;
-        }
-
-        .navbar-links a {
-            display: block;
-            padding: 7px 14px;
-            font-family: var(--font-stack);
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 8px;
-            transition: color 0.2s ease, background 0.2s ease;
-            cursor: none;
-            letter-spacing: 0.01em;
-        }
-
-        .navbar-links a:hover {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* CTA button in navbar */
-        .navbar-cta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .navbar-cta a.nav-btn {
-            padding: 9px 20px;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.25s ease;
-            cursor: none;
-            letter-spacing: 0.01em;
-        }
-
-        .navbar-cta a.nav-btn-ghost {
-            color: var(--text-muted);
-            border: 1px solid var(--border-subtle);
-        }
-
-        .navbar-cta a.nav-btn-ghost:hover {
-            color: var(--text-primary);
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .navbar-cta a.nav-btn-solid {
-            background: var(--accent-gradient);
-            color: #0b1120;
-            font-weight: 700;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
-        }
-
-        .navbar-cta a.nav-btn-solid:hover {
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.45);
-            transform: translateY(-1px);
-        }
-
-        /* Hamburger for mobile */
-        .navbar-hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            background: none;
-            border: none;
-            padding: 6px;
-            cursor: none;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .navbar-hamburger:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .navbar-hamburger span {
-            display: block;
-            width: 22px;
-            height: 2px;
-            background: var(--text-muted);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-hamburger.open span:nth-child(1) {
-            transform: translateY(7px) rotate(45deg);
-        }
-
-        .navbar-hamburger.open span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .navbar-hamburger.open span:nth-child(3) {
-            transform: translateY(-7px) rotate(-45deg);
-        }
-
-        /* Mobile menu */
-        .navbar-mobile {
-            display: none;
-            position: fixed;
-            top: var(--nav-height);
-            left: 0;
-            right: 0;
-            background: rgba(11, 17, 32, 0.97);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 16px 24px 24px;
-            z-index: 899;
-            transform: translateY(-10px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.25s ease;
-        }
-
-        .navbar-mobile.open {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: all;
-        }
-
-        .navbar-mobile a {
-            display: block;
-            padding: 12px 4px;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-bottom: 1px solid var(--border-subtle);
-            transition: color 0.2s;
-            cursor: none;
-        }
-
-        .navbar-mobile a:last-child {
-            border-bottom: none;
-        }
-
-        .navbar-mobile a:hover {
-            color: var(--text-primary);
-        }
-
-        .navbar-mobile .mob-cta {
-            margin-top: 16px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .navbar-mobile .mob-cta a {
-            flex: 1;
-            text-align: center;
-            border: none;
-            border-radius: 10px;
-            padding: 12px;
-            font-weight: 600;
-        }
-
-        .navbar-mobile .mob-cta a.mob-ghost {
-            border: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-        }
-
-        .navbar-mobile .mob-cta a.mob-solid {
-            background: var(--accent-gradient);
-            color: #0b1120;
-        }
-
-        /* Offset sections for fixed navbar */
-        html {
-            scroll-padding-top: var(--nav-height);
-        }
-
-        body {
-            padding-top: var(--nav-height);
-        }
-
-        @media (max-width: 860px) {
-            .navbar {
-                padding: 0 20px;
-            }
-
-            .navbar-links,
-            .navbar-cta {
-                display: none;
-            }
-
-            .navbar-hamburger {
-                display: flex;
-            }
-
-            .navbar-mobile {
-                display: block;
-            }
-        }
-
-        /* ============================================================
-   RESET & BASE
-   ============================================================ */
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        body {
-            font-family: var(--font-stack);
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.7;
-            overflow-x: hidden;
-            cursor: none;
-            padding-top: var(--nav-height);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200' opacity='0.03'%3E%3Cg fill='none' stroke='%2338bdf8' stroke-width='1.5'%3E%3Cpath d='M100 30 L130 75 L100 65 L70 75 Z'/%3E%3Cpath d='M130 75 L145 130 L115 115 L100 65 Z'/%3E%3Cpath d='M70 75 L100 65 L85 115 L55 130 Z'/%3E%3Cpath d='M100 65 L115 115 L100 140 L85 115 Z'/%3E%3Cpolygon points='100,155 110,170 90,170'/%3E%3Cpath d='M75 170 L125 170' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        /* Hide default cursor on non-touch devices */
-        @media (pointer: coarse) {
-            body {
-                cursor: auto;
-            }
-        }
-
-        a,
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-            color: inherit;
-        }
-
-        img {
-            max-width: 100%;
-            display: block;
-        }
-
-        /* ============================================================
-   CUSTOM CURSOR
-   ============================================================ */
-        .cursor {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 32px;
-            height: 32px;
-            border: 1.5px solid var(--text-muted);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            will-change: transform;
-            transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s;
-            opacity: 0;
-        }
-
-        .cursor.visible {
-            opacity: 1;
-        }
-
-        .cursor.hover {
-            width: 48px;
-            height: 48px;
-            border-color: var(--accent-soft);
-        }
-
-        @media (pointer: coarse) {
-            .cursor {
-                display: none !important;
-            }
-        }
-
-        /* ============================================================
-   LAYOUT UTILITIES
-   ============================================================ */
-        .container {
-            width: 100%;
-            max-width: 1080px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        section {
-            padding: 100px 0;
-        }
-
-        /* ============================================================
-   TYPOGRAPHY
-   ============================================================ */
-        h1,
-        h2,
-        h3,
-        h4 {
-            font-weight: 600;
-            line-height: 1.25;
-            letter-spacing: -0.02em;
-        }
-
-        h1 {
-            font-size: clamp(2.2rem, 5vw, 3.6rem);
-        }
-
-        h2 {
-            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-            margin-bottom: 16px;
-        }
-
-        h3 {
-            font-size: 1.15rem;
-            margin-bottom: 8px;
-        }
-
-        p {
-            color: var(--text-muted);
-            max-width: 640px;
-        }
-
-        .section-label {
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.12em;
-            color: var(--accent-soft);
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        /* ============================================================
-   BUTTONS
-   ============================================================ */
-        .btn-primary {
-            display: inline-block;
-            padding: 14px 36px;
-            background: var(--accent-primary);
-            color: var(--bg-primary);
-            border: 1px solid var(--accent-soft);
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            cursor: none;
-            transition: background var(--transition-smooth), transform 0.2s;
-            text-decoration: none;
-            outline: none;
-        }
-
-        .btn-primary:hover,
-        .btn-primary:focus-visible {
-            background: var(--accent-soft);
-        }
-
-        .btn-primary:focus-visible {
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
-        }
-
-        @media (pointer: coarse) {
-            .btn-primary {
-                cursor: pointer;
-            }
-        }
-
-        .btn-secondary {
-            display: inline-block;
-            padding: 14px 36px;
-            background: transparent;
-            color: var(--accent-soft);
-            border: 1.5px solid var(--accent-primary);
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            cursor: none;
-            transition: background var(--transition-smooth), color 0.3s, transform 0.2s;
-            text-decoration: none;
-            outline: none;
-        }
-
-        .btn-secondary:hover,
-        .btn-secondary:focus-visible {
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:focus-visible {
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
-        }
-
-        @media (pointer: coarse) {
-            .btn-secondary {
-                cursor: pointer;
-            }
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        /* ============================================================
-   HERO SECTION
-   ============================================================ */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            padding: 80px 0;
-        }
-
-        /* Recycling SVG illustration behind hero */
-        .hero::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            opacity: 0.04;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600' fill='none'%3E%3Cg stroke='%237dd3fc' stroke-width='2' opacity='0.8'%3E%3C!-- Recycling arrows triangle --%3E%3Cpath d='M300 100 L420 300 L180 300 Z' stroke-dasharray='8 6'/%3E%3Cpath d='M300 80 L310 100 L290 100 Z' fill='%237dd3fc'/%3E%3Cpath d='M430 310 L420 290 L440 300 Z' fill='%237dd3fc'/%3E%3Cpath d='M170 310 L180 290 L160 300 Z' fill='%237dd3fc'/%3E%3C!-- Pen shapes --%3E%3Crect x='250' y='380' width='100' height='8' rx='4'/%3E%3Crect x='230' y='400' width='140' height='8' rx='4'/%3E%3Crect x='210' y='420' width='180' height='8' rx='4'/%3E%3C!-- Leaf --%3E%3Cpath d='M480 150 Q500 100 520 150 Q500 130 480 150'/%3E%3Cline x1='500' y1='120' x2='500' y2='160'/%3E%3C!-- Small circles (dots) --%3E%3Ccircle cx='120' cy='180' r='6'/%3E%3Ccircle cx='500' cy='420' r='6'/%3E%3Ccircle cx='80' cy='400' r='4'/%3E%3Ccircle cx='530' cy='250' r='4'/%3E%3C/g%3E%3C/svg%3E");
-            background-size: 600px 600px;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
-        .hero::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 30% 50%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 60%, rgba(125, 211, 252, 0.08) 0%, transparent 55%);
-            animation: heroGradient 12s ease-in-out infinite alternate;
-            z-index: 0;
-        }
-
-        @keyframes heroGradient {
-            0% {
-                background: radial-gradient(ellipse at 30% 50%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
-                    radial-gradient(ellipse at 70% 60%, rgba(125, 211, 252, 0.08) 0%, transparent 55%);
-            }
-
-            100% {
-                background: radial-gradient(ellipse at 50% 40%, rgba(56, 189, 248, 0.16) 0%, transparent 65%),
-                    radial-gradient(ellipse at 40% 70%, rgba(125, 211, 252, 0.1) 0%, transparent 50%);
-            }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero h1 {
-            margin-bottom: 20px;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            margin: 0 auto 36px;
-            max-width: 520px;
-        }
-
-        /* ============================================================
-   TABBED INFORMATION SECTION
-   ============================================================ */
-        .info-section {
-            background: var(--bg-secondary);
-        }
-
-        .tabs-wrapper {
-            margin-top: 32px;
-        }
-
-        .tab-list {
-            display: flex;
-            gap: 0;
-            position: relative;
-            border-bottom: 1px solid var(--border-subtle);
-            margin-bottom: 32px;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 12px 28px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            cursor: none;
-            transition: color 0.3s;
-            position: relative;
-        }
-
-        .tab-btn[aria-selected="true"] {
-            color: var(--text-primary);
-        }
-
-        @media (pointer: coarse) {
-            .tab-btn {
-                cursor: pointer;
-            }
-        }
-
-        .tab-indicator {
-            position: absolute;
-            bottom: -1px;
-            height: 2px;
-            background: var(--accent-gradient);
-            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .tab-panel {
-            display: none;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
-        }
-
-        .tab-panel.active {
-            display: block;
-        }
-
-        .tab-panel.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tab-panel p {
-            margin-bottom: 16px;
-            line-height: 1.8;
-        }
-
-        .tab-panel p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* ============================================================
-   HOW IT WORKS
-   ============================================================ */
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .step-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            padding: 32px 24px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .step-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .step-icon {
-            width: 44px;
-            height: 44px;
-            margin: 0 auto 18px;
-            color: var(--accent-soft);
-        }
-
-        .step-number {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--accent-soft);
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .step-card p {
-            font-size: 0.88rem;
-            margin: 0 auto;
-        }
-
-        /* ============================================================
-   WHY PARTNER WITH US
-   ============================================================ */
-        .why-section {
-            background: var(--bg-secondary);
-        }
-
-        .benefits-list {
-            margin-top: 32px;
-            list-style: none;
-        }
-
-        .benefits-list li {
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            gap: 16px;
-            align-items: flex-start;
-        }
-
-        .benefits-list li:last-child {
-            border-bottom: none;
-        }
-
-        .benefit-marker {
-            flex-shrink: 0;
-            width: 28px;
-            height: 28px;
-            color: var(--accent-soft);
-            margin-top: 2px;
-        }
-
-        .benefit-content h3 {
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .benefit-content p {
-            font-size: 0.92rem;
-        }
-
-        /* ============================================================
-   REGISTRATION SECTION
-   ============================================================ */
-        .register-section {
-            background: var(--bg-primary);
-        }
-
-        .register-form {
-            margin-top: 36px;
-            max-width: 520px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group label {
-            font-size: 0.82rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            letter-spacing: 0.02em;
-        }
-
-        .form-group input,
-        .form-group select {
-            background: var(--glass-bg);
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 12px 16px;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            cursor: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .form-group select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--accent-soft);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
-        }
-
-        @media (pointer: coarse) {
-
-            .form-group input,
-            .form-group select {
-                cursor: auto;
-            }
-        }
-
-        .register-form .btn-primary {
-            align-self: flex-start;
-            margin-top: 4px;
-        }
-
-        /* ============================================================
-   AUTH: LOGIN SECTION
-   ============================================================ */
-        .login-section {
-            background: var(--bg-primary);
-        }
-
-        .login-form {
-            margin-top: 36px;
-            max-width: 420px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .login-form .btn-primary {
-            align-self: flex-start;
-            margin-top: 4px;
-            position: relative;
-        }
-
-        .login-form .btn-primary:disabled {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .auth-error {
-            color: #f87171;
-            font-size: 0.88rem;
-            padding: 10px 14px;
-            background: rgba(248, 113, 113, 0.08);
-            border: 1px solid rgba(248, 113, 113, 0.2);
-            border-radius: 6px;
-            display: none;
-        }
-
-        .auth-error.visible {
-            display: block;
-        }
-
-        .auth-success {
-            color: #34d399;
-            font-size: 0.88rem;
-            padding: 10px 14px;
-            background: rgba(52, 211, 153, 0.08);
-            border: 1px solid rgba(52, 211, 153, 0.2);
-            border-radius: 6px;
-            display: none;
-        }
-
-        .auth-success.visible {
-            display: block;
-        }
-
-        /* Loading spinner */
-        .btn-loading::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            margin-left: 10px;
-            border: 2px solid transparent;
-            border-top-color: var(--bg-primary);
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ============================================================
-   AUTH: DASHBOARD SECTION
-   ============================================================ */
-        .dashboard-section {
-            background: var(--bg-secondary);
-            display: none;
-        }
-
-        .dashboard-section.active {
-            display: block;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 36px;
-            max-width: 600px;
-        }
-
-        .dashboard-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            padding: 24px;
-        }
-
-        .dashboard-card .card-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
-        .dashboard-card .card-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            word-break: break-word;
-        }
-
-        .btn-logout {
-            display: inline-block;
-            padding: 12px 32px;
-            background: transparent;
-            color: #f87171;
-            border: 1.5px solid rgba(248, 113, 113, 0.3);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: none;
-            transition: background 0.3s, color 0.3s;
-            margin-top: 32px;
-        }
-
-        .btn-logout:hover {
-            background: rgba(248, 113, 113, 0.1);
-            color: #fca5a5;
-        }
-
-        @media (pointer: coarse) {
-            .btn-logout {
-                cursor: pointer;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Auth-aware visibility helpers */
-        .auth-hidden {
-            display: none !important;
-        }
-
-        /* ============================================================
-   FOOTER
-   ============================================================ */
-        footer {
-            padding: 40px 0;
-            border-top: 1px solid var(--border-subtle);
-            text-align: center;
-        }
-
-        footer p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin: 0 auto;
-        }
-
-        footer a {
-            color: var(--accent-soft);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        footer a:hover {
-            color: var(--text-primary);
-        }
-
-        /* ============================================================
-   SCROLL ANIMATIONS
-   ============================================================ */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .fade-in.in-view {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ============================================================
-   FLOATING PENS
-   ============================================================ */
-        .floating-pens-container {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .floating-pen {
-            position: absolute;
-            opacity: 0.12;
-            transition: opacity 0.5s;
-            color: var(--accent-soft);
-        }
-
-        @media (pointer: coarse) {
-            .floating-pens-container {
-                display: none;
-            }
-        }
-
-        /* ============================================================
-   RESPONSIVE
-   ============================================================ */
-        @media (max-width: 900px) {
-            .steps-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 600px) {
-            section {
-                padding: 72px 0;
-            }
-
-            .steps-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .tab-btn {
-                padding: 10px 18px;
-                font-size: 0.88rem;
-            }
-
-            .hero {
-                min-height: 90vh;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RePen India — We partner with schools, colleges, and organisations across India to collect used pens and channel them into responsible recycling." />
+  <meta property="og:title" content="RePen India — Rethink the Pen. Reclaim the Plastic." />
+  <meta property="og:description" content="Responsible pen recycling across India — one pen at a time." />
+  <meta property="og:type" content="website" />
+  <title>RePen India — Responsible Pen Recycling</title>
+
+  <!-- ─── FONTS ─── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════
+       RESET & BASE
+    ════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    :root {
+      --ink:       #0d1a12;
+      --paper:     #f4efe6;
+      --cream:     #faf6ed;
+      --leaf:      #1a4d2e;
+      --sprout:    #2d7a47;
+      --lime:      #8bc34a;
+      --clay:      #c17c3a;
+      --mist:      #e2ddd0;
+      --smoke:     #8a8478;
+      --white:     #ffffff;
+
+      --ff-display: 'Fraunces', Georgia, serif;
+      --ff-body:    'DM Sans', system-ui, sans-serif;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    body {
+      font-family: var(--ff-body);
+      background: var(--paper);
+      color: var(--ink);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    /* Only hide OS cursor on fine pointer (mouse) devices */
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .cursor { display: block !important; }
+    }
+
+    /* ── SKIP LINK ── */
+    .skip-link {
+      position: absolute;
+      top: -100%; left: 1rem;
+      background: var(--leaf); color: var(--cream);
+      padding: 0.5rem 1rem;
+      border-radius: 0 0 8px 8px;
+      font-size: 0.9rem; font-weight: 600;
+      text-decoration: none; z-index: 10000;
+      transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ── RESPECT REDUCED MOTION ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    img { display: block; max-width: 100%; }
+    a   { color: inherit; }
+
+    /* ─── CUSTOM CURSOR (enabled via @media pointer:fine) ─── */
+    .cursor {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 12px; height: 12px;
+      background: var(--leaf);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s var(--ease-out-expo),
+                  background 0.2s,
+                  width 0.25s var(--ease-out-expo),
+                  height 0.25s var(--ease-out-expo);
+      transform: translate(-50%, -50%);
+    }
+    .cursor.hovering {
+      width: 40px; height: 40px;
+      background: var(--lime);
+      opacity: 0.55;
+    }
+    .cursor.clicking {
+      transform: translate(-50%, -50%) scale(0.7);
+    }
+
+    /* ─── GRAIN OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.8s var(--ease-out-expo),
+                  transform 0.8s var(--ease-out-expo);
+    }
+    .reveal.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ════════════════════════════════════════════════════════
+       NAV
+    ════════════════════════════════════════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 4rem;
+      transition: background 0.4s, border-bottom 0.4s, backdrop-filter 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(244, 239, 230, 0.88);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-bottom: 1px solid var(--mist);
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      text-decoration: none;
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--leaf);
+      letter-spacing: -0.03em;
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--leaf); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 18px; height: 18px; fill: var(--lime); }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2.5rem;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ink); opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active {
+      opacity: 1; color: var(--leaf);
+      position: relative;
+    }
+    .nav-links a.active::after {
+      content: '';
+      position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 2px; background: var(--leaf); border-radius: 2px;
+    }
+
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+    .btn-ghost {
+      text-decoration: none;
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--ink); opacity: 0.7;
+      padding: 0.5rem 1.1rem;
+      border: 1.5px solid transparent;
+      border-radius: 100px;
+      transition: border-color 0.2s, opacity 0.2s;
+      letter-spacing: 0.01em;
+    }
+    .btn-ghost:hover { border-color: var(--mist); opacity: 1; }
+
+    .btn-solid {
+      text-decoration: none;
+      font-size: 0.82rem; font-weight: 500;
+      background: var(--leaf); color: var(--cream);
+      padding: 0.55rem 1.4rem;
+      border-radius: 100px;
+      border: 2px solid var(--leaf);
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-solid:hover { background: var(--sprout); transform: translateY(-1px); }
+
+    /* ════════════════════════════════════════════════════════
+       HERO — SPLIT LAYOUT
+    ════════════════════════════════════════════════════════ */
+    .hero {
+      display: grid;
+      grid-template-columns: 55% 45%;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── HERO LEFT ── */
+    .hero-left {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 9rem 4rem 5rem 4.5rem;
+      background: var(--cream);
+      position: relative; z-index: 2;
+    }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--sprout);
+      margin-bottom: 1.6rem;
+    }
+    .eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px; height: 1.5px;
+      background: var(--sprout);
+    }
+
+    .hero-h1 {
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: clamp(3.2rem, 5.5vw, 5.2rem);
+      line-height: 0.97;
+      letter-spacing: -0.05em;
+      color: var(--leaf);
+      margin-bottom: 1.6rem;
+    }
+    .hero-h1 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--clay);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--ink);
+      opacity: 0.65;
+      max-width: 420px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem;
+      flex-wrap: wrap; align-items: center;
+    }
+
+    .btn-primary {
+      display: inline-block; text-decoration: none;
+      background: var(--leaf); color: var(--cream);
+      font-weight: 500; font-size: 0.92rem; letter-spacing: 0.02em;
+      padding: 0.9rem 2.4rem;
+      border-radius: 100px;
+      border: 2px solid var(--leaf);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--sprout); transform: translateY(-2px); }
+
+    .btn-outline {
+      display: inline-block; text-decoration: none;
+      border: 2px solid rgba(13,26,18,0.35);
+      color: var(--ink);
+      font-weight: 500; font-size: 0.92rem; letter-spacing: 0.02em;
+      padding: 0.9rem 2.4rem;
+      border-radius: 100px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-outline:hover {
+      background: var(--ink);
+      color: var(--cream);
+      border-color: var(--ink);
+    }
+
+    .hero-stats {
+      display: flex; gap: 2.5rem;
+      margin-top: 3.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--mist);
+    }
+    .hero-stat .num {
+      display: block;
+      font-family: var(--ff-display);
+      font-size: 2.1rem; font-weight: 700;
+      color: var(--leaf); letter-spacing: -0.05em;
+      line-height: 1;
+    }
+    .hero-stat .label {
+      display: block;
+      font-size: 0.72rem; font-weight: 400;
+      color: var(--smoke);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-top: 0.3rem;
+      line-height: 1.4;
+    }
+
+    /* ── HERO RIGHT ── */
+    .hero-right {
+      background: var(--leaf);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .hero-illustration {
+      position: relative; z-index: 2;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Concentric circle background decoration */
+    .hero-circles {
+      position: absolute;
+      width: 520px; height: 520px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .hero-circles circle {
+      fill: none;
+      stroke: rgba(139, 195, 74, 0.12);
+    }
+
+    /* Animated pens */
+    .pen-wrap {
+      position: relative; width: 300px; height: 360px; z-index: 3;
+    }
+    .pen-item {
+      position: absolute;
+      border-radius: 5px 5px 2px 2px;
+      animation: float-pen 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes float-pen {
+      0%   { transform: var(--base-t) translateY(0px); }
+      100% { transform: var(--base-t) translateY(-14px); }
+    }
+
+    /* individual pen sizes, positions, colors, delays */
+    .pen-1 { --base-t: rotate(-22deg); width: 11px; height: 188px; background: var(--sprout); top: 20px; left: 40px; animation-delay: 0s; }
+    .pen-1::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 18px; background: var(--lime); border-radius: 5px 5px 0 0; }
+    .pen-1::after  { content: ''; position: absolute; bottom: 0; left: 1px; right: 1px; height: 10px; background: var(--clay); border-radius: 0 0 2px 2px; }
+
+    .pen-2 { --base-t: rotate(9deg); width: 10px; height: 200px; background: #163f25; top: 10px; left: 110px; animation-delay: 0.8s; }
+    .pen-2::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 16px; background: var(--lime); border-radius: 5px 5px 0 0; }
+
+    .pen-3 { --base-t: rotate(-38deg); width: 9px; height: 170px; background: var(--sprout); top: 70px; left: 175px; animation-delay: 1.5s; opacity: .8; }
+    .pen-3::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 14px; background: var(--clay); border-radius: 5px 5px 0 0; }
+
+    .pen-4 { --base-t: rotate(16deg); width: 12px; height: 192px; background: #1e5c35; top: 15px; left: 235px; animation-delay: 0.3s; }
+    .pen-4::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 20px; background: var(--lime); border-radius: 5px 5px 0 0; }
+    .pen-4::after  { content: ''; position: absolute; bottom: 0; left: 2px; right: 2px; height: 10px; background: var(--clay); border-radius: 0 0 2px 2px; }
+
+    .pen-5 { --base-t: rotate(45deg); width: 8px; height: 150px; background: rgba(139,195,74,0.5); top: 130px; left: 60px; animation-delay: 2.2s; }
+    .pen-5::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 12px; background: rgba(255,255,255,.3); border-radius: 5px 5px 0 0; }
+
+    .pen-6 { --base-t: rotate(-10deg); width: 9px; height: 165px; background: #245738; top: 40px; left: 280px; animation-delay: 1.1s; opacity: .7; }
+    .pen-6::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 14px; background: var(--lime); border-radius: 5px 5px 0 0; }
+
+    /* ── TICKER ── */
+    .ticker {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: var(--lime);
+      padding: 0.55rem 0;
+      overflow: hidden; white-space: nowrap; z-index: 4;
+    }
+    .ticker-track {
+      display: inline-block;
+      animation: ticker-scroll 20s linear infinite;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--leaf);
+    }
+    @keyframes ticker-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ════════════════════════════════════════════════════════
+       SECTION SHARED UTILITIES
+    ════════════════════════════════════════════════════════ */
+    .section-label {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--sprout);
+      margin-bottom: 1.2rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block; width: 22px; height: 1.5px;
+      background: currentColor;
+    }
+
+    .section-h2 {
+      font-family: var(--ff-display);
+      font-weight: 700;
+      font-size: clamp(2.2rem, 4vw, 3.6rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      color: var(--leaf);
+      margin-bottom: 1.4rem;
+    }
+    .section-h2 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--clay);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       THE PROBLEM — dark, two-column
+    ════════════════════════════════════════════════════════ */
+    .problem {
+      background: var(--ink);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      padding: 8rem 4.5rem;
+    }
+    .problem .section-label { color: var(--lime); }
+    .problem .section-h2   { color: #faf6ed; }
+    .problem .section-h2 em { color: var(--lime); }
+
+    .problem-body p {
+      font-size: 1rem; line-height: 1.85;
+      color: rgba(250, 246, 237, 0.62);
+      margin-bottom: 1.1rem;
+    }
+    .problem-body p:last-child { margin-bottom: 0; }
+
+    .data-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; margin-bottom: 1.25rem;
+    }
+    .data-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 1.5rem 1.3rem;
+      transition: background 0.2s;
+    }
+    .data-card:hover { background: rgba(255,255,255,0.09); }
+
+    .data-card .big {
+      display: block;
+      font-family: var(--ff-display);
+      font-size: 2.5rem; font-weight: 700;
+      color: var(--lime); letter-spacing: -0.05em;
+      line-height: 1; margin-bottom: 0.4rem;
+    }
+    .data-card .desc {
+      font-size: 0.82rem;
+      color: rgba(250, 246, 237, 0.45);
+      line-height: 1.45;
+    }
+
+    .problem-callout {
+      background: var(--sprout);
+      border-radius: 14px;
+      padding: 1.6rem 1.5rem;
+    }
+    .problem-callout p {
+      font-family: var(--ff-display);
+      font-style: italic; font-size: 1.18rem;
+      color: var(--cream); line-height: 1.55;
+      margin: 0 !important;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       HOW IT WORKS
+    ════════════════════════════════════════════════════════ */
+    .how {
+      background: var(--cream);
+      padding: 8rem 4.5rem;
+    }
+    .how-header {
+      max-width: 540px; margin-bottom: 4.5rem;
+    }
+    .how-header p {
+      font-size: 1rem; color: var(--smoke); line-height: 1.8;
+    }
+
+    .steps-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      position: relative;
+    }
+    /* horizontal connector line */
+    .steps-row::before {
+      content: '';
+      position: absolute; z-index: 0;
+      top: 2rem; left: 2rem; right: 2rem;
+      height: 1px; background: var(--mist);
+    }
+
+    .step { position: relative; z-index: 1; }
+
+    .step-num {
+      width: 4.2rem; height: 4.2rem;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 2px solid var(--mist);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-display);
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--leaf);
+      margin-bottom: 1.6rem;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .step:hover .step-num {
+      background: var(--leaf);
+      border-color: var(--leaf);
+      color: var(--cream);
+    }
+
+    .step-title {
+      font-family: var(--ff-display);
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.025em;
+      margin-bottom: 0.6rem;
+    }
+    .step-body {
+      font-size: 0.9rem; line-height: 1.75;
+      color: var(--smoke);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       WHY REPEN — dark green, two-column
+    ════════════════════════════════════════════════════════ */
+    .why {
+      background: var(--leaf);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6rem; align-items: center;
+      padding: 8rem 4.5rem;
+    }
+    .why .section-label { color: var(--lime); }
+    .why .section-h2    { color: var(--cream); }
+    .why .section-h2 em { color: var(--lime); }
+
+    .why-sub {
+      font-size: 1rem; line-height: 1.85;
+      color: rgba(250,246,237,0.6);
+      max-width: 380px;
+      margin-bottom: 2.5rem;
+    }
+
+    .benefits-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .benefit {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 14px;
+      padding: 1.5rem 1.3rem;
+      transition: background 0.25s, transform 0.25s var(--ease-out-expo);
+    }
+    .benefit:hover {
+      background: rgba(255,255,255,0.11);
+      transform: translateY(-4px);
+    }
+
+    .benefit-icon {
+      width: 42px; height: 42px;
+      background: var(--lime); border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .benefit-icon svg { width: 20px; height: 20px; fill: var(--leaf); }
+
+    .benefit h4 {
+      font-family: var(--ff-display);
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--cream); letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .benefit p {
+      font-size: 0.84rem; line-height: 1.65;
+      color: rgba(250,246,237,0.52);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       FORMS — Register + Donate
+    ════════════════════════════════════════════════════════ */
+    .forms-section {
+      background: var(--paper);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      padding: 8rem 4.5rem;
+    }
+
+    .form-panel {
+      background: var(--cream);
+      border: 1.5px solid var(--mist);
+      border-radius: 20px;
+      padding: 2.8rem;
+    }
+
+    .form-tag {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--sprout);
+      background: rgba(45,122,71,0.1);
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      margin-bottom: 1.1rem;
+    }
+
+    .form-title {
+      font-family: var(--ff-display);
+      font-size: 1.7rem; font-weight: 700;
+      color: var(--leaf); letter-spacing: -0.035em;
+      margin-bottom: 0.4rem;
+    }
+    .form-sub {
+      font-size: 0.88rem; color: var(--smoke);
+      line-height: 1.6; margin-bottom: 2rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label {
+      display: block;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--smoke); margin-bottom: 0.4rem;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--white);
+      border: 1.5px solid var(--mist);
+      border-radius: 10px;
+      font-family: var(--ff-body);
+      font-size: 0.9rem; color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8478' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: var(--smoke); opacity: 0.55; }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--sprout);
+      box-shadow: 0 0 0 3px rgba(45,122,71,0.12);
+    }
+    .field textarea { resize: vertical; min-height: 88px; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: var(--leaf); color: var(--cream);
+      border: none; border-radius: 100px;
+      cursor: pointer;
+      font-family: var(--ff-body);
+      font-size: 0.95rem; font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .submit-btn:hover { background: var(--sprout); transform: translateY(-2px); }
+    .submit-btn:active { transform: scale(0.98); }
+
+    /* success message */
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+    .form-success .tick {
+      width: 52px; height: 52px;
+      background: var(--sprout);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .form-success .tick svg { width: 24px; height: 24px; stroke: var(--cream); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .form-success p {
+      font-family: var(--ff-display);
+      font-size: 1.2rem; font-weight: 600;
+      color: var(--leaf); letter-spacing: -0.02em;
+    }
+    .form-success span {
+      display: block;
+      font-size: 0.88rem; color: var(--smoke); margin-top: 0.4rem;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       PORTAL / SIGN IN + DASHBOARD
+    ════════════════════════════════════════════════════════ */
+    .portal-section {
+      background: var(--ink);
+      display: flex; justify-content: center; align-items: center;
+      padding: 8rem 4.5rem;
+      position: relative; overflow: hidden;
+    }
+    /* decorative arc */
+    .portal-section::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      border: 1px solid rgba(139,195,74,0.08);
+      top: -200px; right: -200px;
+    }
+    .portal-section::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      border: 1px solid rgba(139,195,74,0.05);
+      bottom: -150px; left: -100px;
+    }
+
+    .portal-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 3rem;
+      width: 100%; max-width: 440px;
+      position: relative; z-index: 2;
+    }
+
+    .portal-tag {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--lime);
+      background: rgba(139,195,74,0.12);
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      margin-bottom: 1.1rem;
+    }
+    .portal-title {
+      font-family: var(--ff-display);
+      font-size: 1.7rem; font-weight: 700;
+      color: var(--cream); letter-spacing: -0.035em;
+      margin-bottom: 0.4rem;
+    }
+    .portal-sub {
+      font-size: 0.88rem;
+      color: rgba(250,246,237,0.45);
+      margin-bottom: 2rem; line-height: 1.6;
+    }
+
+    .portal-card .field label { color: rgba(250,246,237,0.4); }
+    .portal-card .field input {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: var(--cream);
+    }
+    .portal-card .field input::placeholder { color: rgba(250,246,237,0.25); }
+    .portal-card .field input:focus {
+      border-color: var(--lime);
+      box-shadow: 0 0 0 3px rgba(139,195,74,0.15);
+    }
+
+    .btn-lime {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: var(--lime); color: var(--leaf);
+      border: none; border-radius: 100px;
+      cursor: pointer;
+      font-family: var(--ff-body);
+      font-size: 0.95rem; font-weight: 600;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-lime:hover { background: #9dd454; transform: translateY(-2px); }
+
+    /* ── DASHBOARD (shown after login) ── */
+    .dashboard { display: none; margin-top: 1.5rem; }
+    .dashboard.active { display: block; }
+
+    .dashboard-header {
+      font-family: var(--ff-display);
+      font-size: 1rem; font-weight: 600;
+      color: var(--lime); margin-bottom: 1rem;
+    }
+    .dash-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .dash-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.88rem;
+    }
+    .dash-row:last-child { border-bottom: none; }
+    .dash-row .k { color: rgba(250,246,237,0.38); }
+    .dash-row .v { color: var(--cream); font-weight: 500; }
+
+    .dash-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; margin-bottom: 1rem;
+    }
+    .dash-stat {
+      background: rgba(139,195,74,0.1);
+      border: 1px solid rgba(139,195,74,0.2);
+      border-radius: 10px; padding: 1rem;
+    }
+    .dash-stat .ds-num {
+      font-family: var(--ff-display);
+      font-size: 1.6rem; font-weight: 700;
+      color: var(--lime); letter-spacing: -0.04em;
+    }
+    .dash-stat .ds-label {
+      font-size: 0.74rem;
+      color: rgba(250,246,237,0.4);
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+
+    .btn-logout {
+      width: 100%;
+      padding: 0.7rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(250,246,237,0.45);
+      border-radius: 100px;
+      cursor: none;
+      font-family: var(--ff-body);
+      font-size: 0.82rem;
+      margin-top: 0.5rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { border-color: rgba(255,255,255,0.3); color: rgba(250,246,237,0.8); }
+
+    /* ════════════════════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════════════════════ */
+    footer {
+      background: var(--ink);
+      padding: 3rem 4.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      flex-wrap: wrap; gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--ff-display);
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--lime); letter-spacing: -0.03em;
+    }
+
+    footer p {
+      font-size: 0.78rem;
+      color: rgba(250,246,237,0.3);
+    }
+    footer a {
+      color: rgba(250,246,237,0.45);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: var(--lime); }
+
+    .footer-links {
+      display: flex; gap: 2rem;
+    }
+    .footer-links a {
+      font-size: 0.78rem;
+      color: rgba(250,246,237,0.35);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .footer-links a:hover { color: var(--lime); }
+
+
+    /* ── HAMBURGER ── */
+    .hamburger {
+      display: none;
+      flex-direction: column; justify-content: center; gap: 5px;
+      width: 36px; height: 36px;
+      background: none; border: none; cursor: pointer;
+      padding: 4px; border-radius: 6px;
+    }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--ink); border-radius: 2px;
+      transition: transform 0.25s, opacity 0.2s;
+      transform-origin: center;
+    }
+    .hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── MOBILE NAV DRAWER ── */
+    .mobile-nav {
+      display: none;
+      position: fixed; inset: 0;
+      background: var(--cream); z-index: 490;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 2rem; padding: 2rem;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-family: var(--ff-display);
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--leaf); text-decoration: none;
+      letter-spacing: -0.04em; transition: color 0.2s;
+    }
+    .mobile-nav a:hover { color: var(--sprout); }
+    .mobile-nav-actions {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      width: 100%; max-width: 260px; margin-top: 0.5rem;
+    }
+    .mobile-nav-actions a {
+      display: block; text-align: center; text-decoration: none;
+      font-family: var(--ff-body); font-size: 1rem; font-weight: 500;
+      padding: 0.85rem 1.5rem; border-radius: 100px;
+    }
+    .mob-primary { background: var(--leaf); color: var(--cream); }
+    .mob-ghost   { border: 1.5px solid var(--mist); color: var(--ink); }
+
+    /* ── FAQ ── */
+    .faq { background: var(--ink); padding: 8rem 4.5rem; }
+    .faq .section-label { color: var(--lime); }
+    .faq .section-h2   { color: var(--cream); margin-bottom: 3rem; }
+    .faq-list { max-width: 720px; }
+    .faq-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .faq-item:first-child { border-top: 1px solid rgba(255,255,255,0.08); }
+    .faq-q {
+      width: 100%; background: none; border: none; text-align: left;
+      padding: 1.4rem 0; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      font-family: var(--ff-body); font-size: 1rem; font-weight: 500;
+      color: var(--cream); transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--lime); }
+    .faq-q svg { width: 20px; height: 20px; stroke: currentColor; fill: none; flex-shrink: 0; transition: transform 0.3s; }
+    .faq-item.open .faq-q { color: var(--lime); }
+    .faq-item.open .faq-q svg { transform: rotate(45deg); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s; }
+    .faq-item.open .faq-a { max-height: 300px; }
+    .faq-a p { padding-bottom: 1.4rem; font-size: 0.95rem; line-height: 1.85; color: rgba(250,246,237,0.55); }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { background: var(--paper); padding: 8rem 4.5rem; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3rem; }
+    .testi-card {
+      background: var(--cream); border: 1.5px solid var(--mist);
+      border-radius: 16px; padding: 2rem 1.75rem;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .testi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(13,26,18,0.08); }
+    .testi-quote { font-family: var(--ff-display); font-style: italic; font-size: 1.02rem; line-height: 1.65; color: var(--ink); margin-bottom: 1.5rem; }
+    .testi-author { display: flex; align-items: center; gap: 0.75rem; }
+    .testi-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--leaf); display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-display); font-size: 1rem; font-weight: 700;
+      color: var(--lime); flex-shrink: 0;
+    }
+    .testi-name { font-size: 0.88rem; font-weight: 600; color: var(--ink); }
+    .testi-role { font-size: 0.75rem; color: var(--smoke); margin-top: 1px; }
+
+    /* ── ABOUT STRIP ── */
+    .about-strip {
+      background: var(--cream); padding: 5rem 4.5rem;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 3rem; border-top: 1px solid var(--mist);
+    }
+    .about-col h3 { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 700; color: var(--leaf); margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+    .about-col p, .about-col a { font-size: 0.9rem; color: var(--smoke); line-height: 1.8; text-decoration: none; display: block; }
+    .about-col a:hover { color: var(--leaf); }
+
+    /* ── PRIVACY / TERMS MODALS ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(13,26,18,0.7); z-index: 8000;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: var(--cream); border-radius: 20px; padding: 2.5rem;
+      max-width: 580px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      background: none; border: none; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: var(--smoke); transition: background 0.2s;
+    }
+    .modal-close:hover { background: var(--mist); }
+    .modal-box h2 { font-family: var(--ff-display); font-size: 1.5rem; color: var(--leaf); margin-bottom: 1.25rem; letter-spacing: -0.03em; }
+    .modal-box h3 { font-size: 1rem; font-weight: 600; color: var(--ink); margin: 1.25rem 0 0.5rem; }
+    .modal-box p { font-size: 0.9rem; color: var(--smoke); line-height: 1.8; margin-bottom: 1rem; }
+
+    /* ── PORTAL ERROR ── */
+    .portal-error {
+      display: none; background: rgba(192,57,43,0.15);
+      border: 1px solid rgba(192,57,43,0.3); border-radius: 8px;
+      padding: 0.75rem 1rem; font-size: 0.85rem; color: #f1948a; margin-bottom: 1rem;
+    }
+    .portal-error.visible { display: block; }
+
+    /* ── INLINE FIELD ERRORS ── */
+    .field-error { display: none; font-size: 0.75rem; color: #c0392b; margin-top: 0.35rem; }
+    .field.has-error .field-error { display: block; }
+    .field.has-error input,
+    .field.has-error select,
+    .field.has-error textarea {
+      border-color: #c0392b !important;
+      box-shadow: 0 0 0 3px rgba(192,57,43,0.1) !important;
+    }
+
+    /* ── PASSWORD STRENGTH ── */
+    .pw-wrap { position: relative; }
+    .pw-toggle {
+      position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--smoke); padding: 4px; display: flex;
+    }
+    .pw-toggle svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+    .pw-strength { margin-top: 0.4rem; }
+    .pw-strength-bar { height: 3px; border-radius: 2px; background: var(--mist); overflow: hidden; }
+    .pw-strength-fill { height: 100%; border-radius: 2px; width: 0%; transition: width 0.3s, background 0.3s; }
+    .pw-strength-label { font-size: 0.7rem; margin-top: 0.3rem; color: var(--smoke); }
+
+    /* ── PRIVACY NOTE ── */
+    .privacy-note { font-size: 0.74rem; color: var(--smoke); text-align: center; margin-top: 1rem; line-height: 1.55; }
+    .privacy-note a { color: var(--sprout); text-decoration: underline; }
+
+    /* ── FOOTER LEGAL ── */
+    .footer-legal { display: flex; gap: 1.5rem; }
+    .footer-legal a { font-size: 0.72rem; color: rgba(250,246,237,0.25); text-decoration: none; }
+    .footer-legal a:hover { color: var(--lime); }
+
+    /* ════════════════════════════════════════════════════════
+       RESPONSIVE — MOBILE
+    ════════════════════════════════════════════════════════ */
+    @media (max-width: 960px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .nav-actions { display: none; }
+      .hamburger { display: flex; }
+      .testimonials { padding: 5rem 1.8rem; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .faq { padding: 5rem 1.8rem; }
+      .about-strip { grid-template-columns: 1fr; padding: 3.5rem 1.8rem; gap: 2rem; }
+    }
+    /* extra mobile breakpoint placeholder */
+    @media (max-width: 960px) { /* continued */
+      body { cursor: auto; }
+      .cursor { display: none; }
+
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+
+      .hero            { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left       { padding: 7rem 1.8rem 3.5rem; }
+      .hero-right      { min-height: 300px; }
+
+      .problem         { grid-template-columns: 1fr; padding: 5rem 1.8rem; gap: 3rem; }
+      .how             { padding: 5rem 1.8rem; }
+      .steps-row       { grid-template-columns: 1fr 1fr; }
+      .steps-row::before { display: none; }
+
+      .why             { grid-template-columns: 1fr; padding: 5rem 1.8rem; gap: 3rem; }
+      .forms-section   { grid-template-columns: 1fr; padding: 5rem 1.8rem; }
+      .portal-section  { padding: 5rem 1.8rem; }
+
+      footer {
+        flex-direction: column; text-align: center;
+        padding: 2.5rem 1.8rem;
+      }
+      .footer-links { justify-content: center; }
+    }
+
+    @media (max-width: 540px) {
+      .steps-row      { grid-template-columns: 1fr; }
+      .data-grid      { grid-template-columns: 1fr; }
+      .benefits-grid  { grid-template-columns: 1fr; }
+      .dash-stats     { grid-template-columns: 1fr; }
+      .field-row      { grid-template-columns: 1fr; }
+      .hero-stats     { flex-direction: column; gap: 1.5rem; }
+    }
+  </style>
 </head>
-
 <body>
 
-    <!-- Custom Cursor -->
-    <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <!-- ═══════════════════════════════════════
+       CUSTOM CURSOR
+  ═══════════════════════════════════════ -->
+  <div class="cursor" id="cursor"></div>
 
-    <!-- ============================================================
-     TOP NAVBAR
-     ============================================================ -->
-    <header class="navbar" id="navbar">
-        <div class="navbar-inner">
-            <!-- Logo -->
-            <a href="#hero" class="navbar-logo" aria-label="RePen India Home">
-                <div class="navbar-logo-icon">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C8 2 5 5 5 9c0 5.5 7 13 7 13s7-7.5 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/>
-                    </svg>
-                </div>
-                <span class="navbar-logo-text">Re<span>Pen</span> India</span>
-            </a>
+  <!-- ═══════════════════════════════════════
+       NAVIGATION
+  ═══════════════════════════════════════ -->
+  <nav id="nav" aria-label="Main navigation">
+    <a href="#hero" class="logo" aria-label="RePen India — home">
+      <div class="logo-mark">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M9 2 L13 6 L9 16 L5 6 Z" fill="var(--lime)"/><circle cx="9" cy="5.5" r="1.1" fill="var(--cream)"/>
+        </svg>
+      </div>
+      RePen India
+    </a>
 
-            <!-- Desktop Links -->
-            <ul class="navbar-links" role="list">
-                <li><a href="#info">The Problem</a></li>
-                <li><a href="#how">How It Works</a></li>
-                <li><a href="#why">Why RePen</a></li>
-            </ul>
+    <div class="nav-links" id="nav-links" role="list">
+      <a href="#problem" role="listitem">The Problem</a>
+      <a href="#how"     role="listitem">How It Works</a>
+      <a href="#why"     role="listitem">Why RePen</a>
+      <a href="#faq"     role="listitem">FAQ</a>
+    </div>
 
-            <!-- Desktop CTA -->
-            <div class="navbar-cta">
-                <a href="#login" class="nav-btn nav-btn-ghost">Sign In</a>
-                <a href="#register" class="nav-btn nav-btn-solid magnetic">Register</a>
-            </div>
+    <div class="nav-actions">
+      <a href="#portal"   class="btn-ghost">Sign In</a>
+      <a href="#register" class="btn-solid">Register</a>
+    </div>
 
-            <!-- Hamburger (mobile) -->
-            <button class="navbar-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-                <span></span>
-                <span></span>
-                <span></span>
+    <button class="hamburger" id="hamburger"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="mobile-nav">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════ -->
+  <main id="main-content">
+  <section class="hero" id="hero" aria-labelledby="hero-heading">
+
+    <!-- LEFT -->
+    <div class="hero-left">
+      <div class="eyebrow reveal">Pen Recycling for India</div>
+
+      <h1 class="hero-h1 reveal reveal-delay-1" id="hero-heading">
+        Rethink<br>the Pen.<br><em>Reclaim</em><br>the Plastic.
+      </h1>
+
+      <p class="hero-sub reveal reveal-delay-2">
+        We partner with schools, colleges, and organisations across India
+        to collect used pens and channel them into responsible recycling —
+        reducing landfill waste, one pen at a time.
+      </p>
+
+      <div class="hero-actions reveal reveal-delay-3">
+        <a href="#register" class="btn-primary">Register Your Institution</a>
+        <a href="#donate"   class="btn-outline">Donate as Individual</a>
+      </div>
+
+      <div class="hero-stats reveal reveal-delay-4">
+        <div class="hero-stat">
+          <span class="num">4.5B+</span>
+          <span class="label">Pens discarded<br>yearly in India</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">&lt;1%</span>
+          <span class="label">Currently<br>recycled</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">400yr</span>
+          <span class="label">To biodegrade<br>one pen</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="hero-right">
+      <!-- Concentric circles -->
+      <svg class="hero-circles" viewBox="0 0 520 520" aria-hidden="true">
+        <circle cx="260" cy="260" r="60"/>
+        <circle cx="260" cy="260" r="110"/>
+        <circle cx="260" cy="260" r="170"/>
+        <circle cx="260" cy="260" r="240"/>
+      </svg>
+
+      <div class="hero-illustration">
+        <div class="pen-wrap">
+          <div class="pen-item pen-1"></div>
+          <div class="pen-item pen-2"></div>
+          <div class="pen-item pen-3"></div>
+          <div class="pen-item pen-4"></div>
+          <div class="pen-item pen-5"></div>
+          <div class="pen-item pen-6"></div>
+        </div>
+      </div>
+
+      <div class="ticker">
+        <div class="ticker-track">
+          One Pen at a Time &nbsp;·&nbsp; Rethink the Pen &nbsp;·&nbsp;
+          Reclaim the Plastic &nbsp;·&nbsp; Recycling for India &nbsp;·&nbsp;
+          One Pen at a Time &nbsp;·&nbsp; Rethink the Pen &nbsp;·&nbsp;
+          Reclaim the Plastic &nbsp;·&nbsp; Recycling for India &nbsp;·&nbsp;
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       THE PROBLEM
+  ═══════════════════════════════════════ -->
+  <section class="problem" id="problem">
+
+    <div>
+      <div class="section-label reveal">Understanding the issue</div>
+      <h2 class="section-h2 reveal reveal-delay-1">The <em>landscape</em><br>we're up against</h2>
+      <div class="problem-body reveal reveal-delay-2">
+        <p>India is among the world's largest consumers of ballpoint pens. Nearly all are made from polypropylene and polystyrene — plastics that do not biodegrade in any meaningful human timeframe.</p>
+        <p>Pens are consistently overlooked in recycling conversations. Their small size makes mechanical sorting impossible. They accumulate in landfills or waterways, feeding the growing microplastic crisis.</p>
+        <p>Institutions — schools, universities, offices — generate the most pen waste, yet almost none have structured mechanisms to divert it from landfill.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="data-grid reveal">
+        <div class="data-card">
+          <span class="big">4.5B</span>
+          <span class="desc">Pens discarded across India every year</span>
+        </div>
+        <div class="data-card">
+          <span class="big">&lt;1%</span>
+          <span class="desc">Currently enter any recycling stream</span>
+        </div>
+        <div class="data-card">
+          <span class="big">400yr</span>
+          <span class="desc">Estimated time for one pen to decompose</span>
+        </div>
+        <div class="data-card">
+          <span class="big">100%</span>
+          <span class="desc">Preventable with structured collection</span>
+        </div>
+      </div>
+
+      <div class="problem-callout reveal reveal-delay-1">
+        <blockquote style="margin:0;font-family:var(--ff-display);font-style:italic;font-size:1.1rem;color:var(--cream);line-height:1.55;">"The small size that makes pens so convenient is precisely what makes them invisible to conventional recycling infrastructure."<br><cite style="display:block;margin-top:0.75rem;font-size:0.78rem;font-style:normal;color:rgba(250,246,237,0.6);">— Swatantra, Founder, RePen India</cite></blockquote>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════ -->
+  <section class="how" id="how">
+    <div class="how-header">
+      <div class="section-label reveal">Process</div>
+      <h2 class="section-h2 reveal reveal-delay-1">How it <em>works</em></h2>
+      <p class="reveal reveal-delay-2">Four clear steps. Zero operational burden on your institution.</p>
+    </div>
+
+    <div class="steps-row">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <div class="step-title">Register</div>
+        <div class="step-body">Your institution signs up. We assess location, volume, and schedule to plan tailored logistics.</div>
+      </div>
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">02</div>
+        <div class="step-title">Collect</div>
+        <div class="step-body">We supply clearly marked collection units. Staff and students deposit used pens over a defined period.</div>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">03</div>
+        <div class="step-title">Pickup</div>
+        <div class="step-body">Our team handles periodic pickups at no cost — scheduled to fit your academic or corporate calendar.</div>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <div class="step-num">04</div>
+        <div class="step-title">Recycle & Report</div>
+        <div class="step-body">Pens are processed through certified recyclers. You receive verified impact documentation.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       WHY REPEN
+  ═══════════════════════════════════════ -->
+  <section class="why" id="why">
+
+    <div>
+      <div class="section-label reveal">Partnership</div>
+      <h2 class="section-h2 reveal reveal-delay-1">Why partner<br><em>with us</em></h2>
+      <p class="why-sub reveal reveal-delay-2">
+        We've built the infrastructure so you don't have to. Your institution participates — we manage everything else from logistics to compliance documentation.
+      </p>
+      <a href="#register" class="btn-primary reveal reveal-delay-3">Get Started Today</a>
+    </div>
+
+    <div class="benefits-grid">
+      <div class="benefit reveal">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M10 2L12 7H17L13 10.5L15 15.5L10 12L5 15.5L7 10.5L3 7H8Z"/>
+          </svg>
+        </div>
+        <h4>Structured Diversion</h4>
+        <p>A clearly defined programme moving pen waste out of landfill through an organised, certified pathway.</p>
+      </div>
+      <div class="benefit reveal reveal-delay-1">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M5 4h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+            <path d="M7 8h6M7 11h4" stroke="#1a4d2e" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h4>Verified Reporting</h4>
+        <p>Receive verifiable collection records — suitable for sustainability disclosures, annual reports, and audits.</p>
+      </div>
+      <div class="benefit reveal reveal-delay-2">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="10" r="8"/>
+            <path d="M7 10l2.5 2.5L14 7.5" stroke="#1a4d2e" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h4>Zero Burden</h4>
+        <p>We handle infrastructure, logistics, and downstream processing. You simply participate.</p>
+      </div>
+      <div class="benefit reveal reveal-delay-3">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M10 2C10 2 4 6.5 4 12a6 6 0 0012 0C16 6.5 10 2 10 2z"/>
+          </svg>
+        </div>
+        <h4>Community Impact</h4>
+        <p>Build environmental awareness across students and staff, reinforcing your institution's values.</p>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ═══════════════════════════════════════
+       TESTIMONIALS
+  ═══════════════════════════════════════ -->
+  <section class="testimonials" id="testimonials" aria-labelledby="testi-heading">
+    <div class="section-label reveal" aria-hidden="true">Voices</div>
+    <h2 class="section-h2 reveal reveal-delay-1" id="testi-heading">What <em>partners</em> say</h2>
+    <div class="testi-grid">
+      <article class="testi-card reveal">
+        <p class="testi-quote">"RePen made it effortless. They brought the bins, handled logistics, and sent a report we could use in our CSR disclosure."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" aria-hidden="true">P</div>
+          <div><div class="testi-name">Priya Mehta</div><div class="testi-role">Sustainability Head, Symbiosis Institute, Pune</div></div>
+        </div>
+      </article>
+      <article class="testi-card reveal reveal-delay-1">
+        <p class="testi-quote">"Our students rallied immediately. In three months we collected over 8,000 pens — something that tangible resonates in ways a pledge never could."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" aria-hidden="true">R</div>
+          <div><div class="testi-name">Rajesh Nair</div><div class="testi-role">Principal, Delhi Public School, Lucknow</div></div>
+        </div>
+      </article>
+      <article class="testi-card reveal reveal-delay-2">
+        <p class="testi-quote">"We were sceptical about reliable pickups from a startup. They haven't missed one in seven months. Genuinely impressed."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" aria-hidden="true">A</div>
+          <div><div class="testi-name">Ananya Bose</div><div class="testi-role">ESG Manager, TCS Kolkata Campus</div></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       FORMS — REGISTER + DONATE
+  ═══════════════════════════════════════ -->
+  <div class="forms-section">
+
+    <!-- REGISTER YOUR INSTITUTION -->
+    <div class="form-panel reveal" id="register">
+      <div class="form-tag">For Institutions</div>
+      <div class="form-title">Register Your Institution</div>
+      <div class="form-sub">Create your account and start tracking your pen recycling impact.</div>
+
+      <div id="reg-form">
+        <div class="field-row">
+          <div class="field">
+            <label>Institution Name</label>
+            <input type="text" id="reg-name" placeholder="e.g. City Montessori School" />
+          </div>
+          <div class="field">
+            <label>Institution Type</label>
+            <select id="reg-type">
+              <option value="">Select type</option>
+              <option>School</option>
+              <option>College / University</option>
+              <option>Corporate Office</option>
+              <option>NGO</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>City</label>
+            <input type="text" id="reg-city" placeholder="e.g. Jaunpur" />
+          </div>
+          <div class="field">
+            <label>State</label>
+            <select id="reg-state">
+              <option value="">Select state</option>
+              <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+              <option>Assam</option><option>Bihar</option><option>Chhattisgarh</option>
+              <option>Goa</option><option>Gujarat</option><option>Haryana</option>
+              <option>Himachal Pradesh</option><option>Jharkhand</option>
+              <option>Karnataka</option><option>Kerala</option>
+              <option>Madhya Pradesh</option><option>Maharashtra</option>
+              <option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+              <option>Nagaland</option><option>Odisha</option><option>Punjab</option>
+              <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+              <option>Telangana</option><option>Tripura</option>
+              <option selected>Uttar Pradesh</option>
+              <option>Uttarakhand</option><option>West Bengal</option>
+              <option>Delhi</option><option>Jammu &amp; Kashmir</option>
+              <option>Ladakh</option><option>Puducherry</option><option>Chandigarh</option>
+              <option>Andaman &amp; Nicobar Islands</option><option>Lakshadweep</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="field-reg-email">
+          <label for="reg-email">Contact Email <span style="color:var(--clay)" aria-hidden="true">*</span></label>
+          <input type="email" id="reg-email" placeholder="principal@institution.edu.in" required aria-required="true" aria-describedby="err-reg-email" autocomplete="email" />
+          <div class="field-error" id="err-reg-email" role="alert">Please enter a valid email address.</div>
+        </div>
+        <div class="field" id="field-reg-pass">
+          <label for="reg-pass">Password <span style="color:var(--clay)" aria-hidden="true">*</span></label>
+          <div class="pw-wrap">
+            <input type="password" id="reg-pass" placeholder="Min. 8 characters"
+                   autocomplete="new-password" required aria-required="true"
+                   aria-describedby="err-reg-pass" minlength="8" />
+            <button type="button" class="pw-toggle" id="reg-pw-toggle" aria-label="Show password">
+              <svg viewBox="0 0 20 20"><path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="3"/></svg>
             </button>
+          </div>
+          <div class="pw-strength">
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+            <div class="pw-strength-label" id="pw-strength-label" aria-live="polite"></div>
+          </div>
+          <div class="field-error" id="err-reg-pass" role="alert">Password must be at least 8 characters.</div>
         </div>
-    </header>
+        <div class="field" id="field-reg-pass2">
+          <label for="reg-pass2">Confirm Password <span style="color:var(--clay)" aria-hidden="true">*</span></label>
+          <div class="pw-wrap">
+            <input type="password" id="reg-pass2" placeholder="Re-enter your password"
+                   autocomplete="new-password" required aria-required="true"
+                   aria-describedby="err-reg-pass2" />
+            <button type="button" class="pw-toggle" id="reg-pw2-toggle" aria-label="Show confirm password">
+              <svg viewBox="0 0 20 20"><path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="err-reg-pass2" role="alert">Passwords do not match.</div>
+        </div>
+        <div class="field">
+          <label>Estimated Monthly Volume</label>
+          <select id="reg-vol">
+            <option value="">Select an estimate</option>
+            <option>Under 500 pens/month</option>
+            <option>500 – 2,000 pens/month</option>
+            <option>2,000 – 5,000 pens/month</option>
+            <option>Over 5,000 pens/month</option>
+          </select>
+        </div>
+        <button class="submit-btn" id="reg-submit-btn" type="button">Create Account →</button>
+        <p class="privacy-note">By registering you agree to our <a href="#" onclick="openModal('privacy-modal');return false;">Privacy Policy</a> and <a href="#" onclick="openModal('terms-modal');return false;">Terms of Service</a>.</p>
+      </div>
 
-    <!-- Mobile Menu -->
-    <nav class="navbar-mobile" id="mobile-menu" aria-label="Mobile navigation">
-        <a href="#info" class="mob-link">The Problem</a>
-        <a href="#how" class="mob-link">How It Works</a>
-        <a href="#why" class="mob-link">Why RePen</a>
-        <div class="mob-cta">
-            <a href="#login" class="mob-ghost">Sign In</a>
-            <a href="#register" class="mob-solid">Register</a>
+      <div class="form-success" id="reg-success" aria-live="polite">
+        <div class="tick">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
+        <p>Registration submitted!</p>
+        <span>We'll reach out within 48 hours to confirm your partnership.</span>
+      </div>
+    </div>
+
+    <!-- DONATE AS INDIVIDUAL -->
+    <div class="form-panel reveal reveal-delay-1" id="donate">
+      <div class="form-tag">For Individuals</div>
+      <div class="form-title">Donate Your Used Pens</div>
+      <div class="form-sub">You don't need to be an institution to make a difference. Every pen counts.</div>
+
+      <div id="don-form">
+        <div class="field-row">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="don-name" placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label>City</label>
+            <input type="text" id="don-city" placeholder="Your city" />
+          </div>
+        </div>
+        <div class="field" id="field-don-email">
+          <label for="don-email">Email <span style="color:var(--clay)" aria-hidden="true">*</span></label>
+          <input type="email" id="don-email" placeholder="you@example.com" required aria-required="true" aria-describedby="err-don-email" autocomplete="email" />
+          <div class="field-error" id="err-don-email" role="alert">Please enter a valid email address.</div>
+        </div>
+        <div class="field">
+          <label>Approximate Number of Pens</label>
+          <select id="don-count">
+            <option value="">Select a range</option>
+            <option>1 – 20 pens</option>
+            <option>20 – 50 pens</option>
+            <option>50 – 100 pens</option>
+            <option>More than 100 pens</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Preferred Pickup / Drop-off</label>
+          <select id="don-method">
+            <option value="">Select method</option>
+            <option>Home pickup</option>
+            <option>Drop at collection point</option>
+            <option>Mail-in</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Message (optional)</label>
+          <textarea id="don-msg" placeholder="Anything you'd like us to know…"></textarea>
+        </div>
+        <button class="submit-btn" id="don-submit-btn" type="button">Submit Donation →</button>
+        <p class="privacy-note">Your data is used only to arrange your donation. See our <a href="#" onclick="openModal('privacy-modal');return false;">Privacy Policy</a>.</p>
+      </div>
+
+      <div class="form-success" id="don-success" aria-live="polite">
+        <div class="tick">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p>Thank you for donating!</p>
+        <span>We'll contact you shortly to arrange collection.</span>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════
+       FAQ
+  ═══════════════════════════════════════ -->
+  <section class="faq" id="faq" aria-labelledby="faq-heading">
+    <div class="section-label reveal" aria-hidden="true">Common questions</div>
+    <h2 class="section-h2 reveal reveal-delay-1" id="faq-heading">Things people <em>ask</em></h2>
+    <div class="faq-list reveal reveal-delay-2">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a1">
+          Is there a minimum number of pens to register?
+          <svg viewBox="0 0 20 20" aria-hidden="true"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+        </button>
+        <div class="faq-a" id="faq-a1"><p>No minimum. We work with small schools collecting 200 pens a month and large campuses with 10,000+. Pickup frequency is tailored to your volume.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a2">
+          What types of pens do you accept?
+          <svg viewBox="0 0 20 20" aria-hidden="true"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+        </button>
+        <div class="faq-a" id="faq-a2"><p>All ballpoint, gel, and rollerball pens — empty, partial, or full. Marker bodies and highlighter casings too. We cannot process fountain pen nibs or metallic components.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a3">
+          How much does the service cost?
+          <svg viewBox="0 0 20 20" aria-hidden="true"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+        </button>
+        <div class="faq-a" id="faq-a3"><p>Collection bin placement and pickups are currently free to registered partners. We are a social enterprise — costs are offset through recycling partnerships.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a4">
+          Which cities are you operating in?
+          <svg viewBox="0 0 20 20" aria-hidden="true"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+        </button>
+        <div class="faq-a" id="faq-a4"><p>Currently Lucknow, Jaunpur, Varanasi, and Allahabad in UP, with pilots in Delhi NCR and Pune. Register anyway if you're outside — we will notify you when we expand to your area.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a5">
+          What happens to pens after pickup?
+          <svg viewBox="0 0 20 20" aria-hidden="true"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+        </button>
+        <div class="faq-a" id="faq-a5"><p>Pens are disassembled and plastic components are shredded and pelletised by certified recyclers. You receive a verified impact certificate with weight diverted and CO2 equivalent avoided.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       INSTITUTION PORTAL (SIGN IN + DASHBOARD)
+  ═══════════════════════════════════════ -->
+  <section class="portal-section" id="portal">
+    <div class="portal-card reveal">
+
+      <div class="portal-tag">Institution Portal</div>
+      <div class="portal-title">Sign In</div>
+      <div class="portal-sub">Access your dashboard, track collections, and manage your profile.</div>
+
+      <div id="portal-error" class="portal-error" role="alert" aria-live="assertive"></div>
+      <div id="login-form" role="form" aria-label="Sign in">
+        <div class="field" id="field-login-email">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" placeholder="your@institution.edu.in"
+                 autocomplete="email" required aria-required="true" />
+        </div>
+        <div class="field" id="field-login-pass">
+          <label for="login-pass">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="login-pass" placeholder="Your password"
+                   autocomplete="current-password" required aria-required="true" />
+            <button type="button" class="pw-toggle" id="login-pw-toggle" aria-label="Show password">
+              <svg viewBox="0 0 20 20"><path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/><circle cx="10" cy="10" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="btn-lime" id="login-btn" type="button">Sign In →</button>
+      </div>
+
+      <!-- DASHBOARD — shown after login -->
+      <div class="dashboard" id="dashboard" aria-live="polite">
+        <div class="dashboard-header">Welcome back 👋</div>
+
+        <div class="dash-stats">
+          <div class="dash-stat">
+            <div class="ds-num" id="dash-pens">0</div>
+            <div class="ds-label">Pens Collected</div>
+          </div>
+          <div class="dash-stat">
+            <div class="ds-num" id="dash-pickups">0</div>
+            <div class="ds-label">Total Pickups</div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-row">
+            <span class="k">Institution</span>
+            <span class="v" id="dash-inst">—</span>
+          </div>
+          <div class="dash-row">
+            <span class="k">Email</span>
+            <span class="v" id="dash-email">—</span>
+          </div>
+          <div class="dash-row">
+            <span class="k">Status</span>
+            <span class="v" style="color: var(--lime);">Active Partner</span>
+          </div>
+          <div class="dash-row">
+            <span class="k">Next Pickup</span>
+            <span class="v" id="dash-next">—</span>
+          </div>
+        </div>
+
+        <button class="btn-logout" id="logout-btn" type="button">Logout</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════
+       ABOUT / CONTACT
+  ═══════════════════════════════════════ -->
+  <section class="about-strip" id="about" aria-label="About RePen India">
+    <div class="about-col">
+      <h3>About RePen India</h3>
+      <p>RePen India is a social enterprise founded in Jaunpur, Uttar Pradesh, building India's first structured pen recycling infrastructure — starting with the institutions that generate the most waste.</p>
+    </div>
+    <div class="about-col">
+      <h3>Contact Us</h3>
+      <a href="mailto:hello@repenin.com">hello@repenin.com</a>
+      <a href="tel:+919999999999">+91 99999 99999</a>
+      <p style="margin-top:0.5rem">Mon – Sat, 10am – 6pm IST</p>
+    </div>
+    <div class="about-col">
+      <h3>Follow Along</h3>
+      <a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href="#">Instagram <span style="font-size:0.75rem;color:var(--smoke)">(coming soon)</span></a>
+      <a href="#">Twitter / X <span style="font-size:0.75rem;color:var(--smoke)">(coming soon)</span></a>
+    </div>
+  </section>
+
+  </main><!-- /main landmark -->
+
+  <!-- ── PRIVACY MODAL ── -->
+  <div class="modal-backdrop" id="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="priv-title">
+    <div class="modal-box">
+      <button class="modal-close" aria-label="Close" onclick="closeModal('privacy-modal')">&#x2715;</button>
+      <h2 id="priv-title">Privacy Policy</h2>
+      <p><em>Last updated: January 2025</em></p>
+      <h3>What we collect</h3>
+      <p>When you register or submit a donation request, we collect your name, email, city, and institution details. We do not collect payment information.</p>
+      <h3>How we use it</h3>
+      <p>Your data is used solely to facilitate pen collection logistics and send you impact reports. We do not sell or share your personal data with third parties.</p>
+      <h3>Your rights</h3>
+      <p>You may request access to or deletion of your data at any time by emailing <a href="mailto:hello@repenin.com">hello@repenin.com</a>.</p>
+    </div>
+  </div>
+
+  <!-- ── TERMS MODAL ── -->
+  <div class="modal-backdrop" id="terms-modal" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+    <div class="modal-box">
+      <button class="modal-close" aria-label="Close" onclick="closeModal('terms-modal')">&#x2715;</button>
+      <h2 id="terms-title">Terms of Service</h2>
+      <p><em>Last updated: January 2025</em></p>
+      <h3>Use of service</h3>
+      <p>By registering, your institution agrees to provide reasonable access for collection bin placement and periodic pickups as scheduled.</p>
+      <h3>Our obligations</h3>
+      <p>RePen India commits to supplying collection bins, scheduling pickups at agreed intervals, and providing impact documentation within 30 days of each collection.</p>
+      <h3>No fees</h3>
+      <p>The service is currently free for partner institutions. We reserve the right to introduce pricing with 90 days advance notice.</p>
+      <h3>Termination</h3>
+      <p>Either party may end the partnership with 30 days written notice.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════ -->
+  <footer>
+    <div class="footer-logo">RePen India</div>
+
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="#problem">The Problem</a>
+      <a href="#how">How It Works</a>
+      <a href="#why">Why RePen</a>
+      <a href="#faq">FAQ</a>
+      <a href="#register">Register</a>
+      <a href="#about">About</a>
     </nav>
 
-    <!-- ============================================================
-     HERO SECTION
-     ============================================================ -->
-    <section class="hero" id="hero">
-        <div class="container hero-content">
-            <p class="section-label fade-in">Pen Recycling for India</p>
-            <h1 class="fade-in">Rethink the Pen.<br>Reclaim the Plastic.</h1>
-            <p class="fade-in">We partner with schools, colleges, and organisations across India to collect used pens
-                and channel them into responsible recycling — reducing landfill waste, one pen at a time.</p>
-            <div class="hero-buttons fade-in">
-                <a href="#register" class="btn-primary magnetic" role="button">Register Your Institution</a>
-                <a href="#donate" class="btn-secondary magnetic" role="button">Donate as Individual</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     INFORMATION SECTION (Tabbed)
-     ============================================================ -->
-    <section class="info-section" id="info">
-        <div class="container">
-            <p class="section-label fade-in">Understanding the Issue</p>
-            <h2 class="fade-in">The Landscape</h2>
-
-            <div class="tabs-wrapper fade-in">
-                <div class="tab-list" role="tablist" aria-label="Information tabs">
-                    <button class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-problem"
-                        id="tab-problem">The Problem</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-solution"
-                        id="tab-solution">Our Solution</button>
-                    <div class="tab-indicator" id="tab-indicator"></div>
-                </div>
-
-                <div class="tab-panel active visible" role="tabpanel" id="panel-problem" aria-labelledby="tab-problem"
-                    tabindex="0">
-                    <p>India is one of the world's largest consumers of ballpoint pens. The vast majority of these pens
-                        are made from polypropylene and polystyrene — plastics that do not biodegrade in any meaningful
-                        human timeframe. Once discarded, they enter municipal waste streams that lack the infrastructure
-                        to segregate or recycle small-format plastics.</p>
-                    <p>Pens are consistently overlooked in recycling conversations. Unlike bottles or packaging, their
-                        small size makes them difficult to sort mechanically. As a result, they accumulate in landfills
-                        or end up in waterways, contributing to microplastic pollution across ecosystems.</p>
-                    <p>Institutions such as schools, universities, and offices are among the highest-volume generators
-                        of pen waste, yet very few have a structured mechanism for collecting or diverting this material
-                        from landfill.</p>
-                </div>
-
-                <div class="tab-panel" role="tabpanel" id="panel-solution" aria-labelledby="tab-solution" tabindex="0">
-                    <p>RePen India operates a structured pen collection and recycling programme designed for
-                        institutional partners. We provide collection infrastructure, logistics coordination, and
-                        certified recycling pathways — removing the complexity that prevents institutions from acting on
-                        this waste stream.</p>
-                    <p>Our approach is built around simplicity for the partner: we supply designated collection units,
-                        schedule periodic pickups, and manage the downstream processing. Collected pens are
-                        disassembled, sorted by polymer type, and channelled to licensed recyclers equipped to handle
-                        small-format plastics.</p>
-                    <p>Each partner institution receives documentation of their collection volumes and environmental
-                        contribution, supporting their own sustainability reporting and institutional commitments.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     HOW IT WORKS
-     ============================================================ -->
-    <section class="how-section" id="how">
-        <div class="container">
-            <p class="section-label fade-in">Process</p>
-            <h2 class="fade-in">How It Works</h2>
-
-            <div class="steps-grid">
-                <!-- Step 1 -->
-                <div class="step-card fade-in">
-                    <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <line x1="19" y1="8" x2="19" y2="14" />
-                        <line x1="22" y1="11" x2="16" y2="11" />
-                    </svg>
-                    <p class="step-number">Step 01</p>
-                    <h3>Register</h3>
-                    <p>Your institution signs up through our registration form. We assess your location and volume to
-                        plan logistics.</p>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="step-card fade-in">
-                    <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path
-                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                        <line x1="12" y1="22.08" x2="12" y2="12" />
-                    </svg>
-                    <p class="step-number">Step 02</p>
-                    <h3>Collect</h3>
-                    <p>We provide clearly marked collection units. Your staff and students deposit used pens over a
-                        defined period.</p>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="step-card fade-in">
-                    <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                        <circle cx="5.5" cy="18.5" r="2.5" />
-                        <circle cx="18.5" cy="18.5" r="2.5" />
-                    </svg>
-                    <p class="step-number">Step 03</p>
-                    <h3>Pickup</h3>
-                    <p>Our team coordinates periodic pickups at no cost to the institution. Collections are scheduled to
-                        suit your calendar.</p>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="step-card fade-in">
-                    <svg class="step-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                        <polyline points="17 6 23 6 23 12" />
-                    </svg>
-                    <p class="step-number">Step 04</p>
-                    <h3>Recycle &amp; Report</h3>
-                    <p>Pens are processed through certified recyclers. You receive a summary documenting volumes and
-                        impact.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     WHY PARTNER WITH US
-     ============================================================ -->
-    <section class="why-section" id="why">
-        <div class="container">
-            <p class="section-label fade-in">Partnership</p>
-            <h2 class="fade-in">Why Partner With Us</h2>
-
-            <ul class="benefits-list">
-                <li class="fade-in">
-                    <svg class="benefit-marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    </svg>
-                    <div class="benefit-content">
-                        <h3>Structured Waste Diversion</h3>
-                        <p>A clearly defined programme that diverts pen waste from landfill through an organised
-                            collection and recycling pathway.</p>
-                    </div>
-                </li>
-                <li class="fade-in">
-                    <svg class="benefit-marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                        <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                    <div class="benefit-content">
-                        <h3>Documentation &amp; Reporting</h3>
-                        <p>Receive verifiable records of collection volumes, suitable for sustainability disclosures,
-                            annual reports, and institutional audits.</p>
-                    </div>
-                </li>
-                <li class="fade-in">
-                    <svg class="benefit-marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="2" y1="12" x2="22" y2="12" />
-                        <path
-                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                    <div class="benefit-content">
-                        <h3>Zero Operational Burden</h3>
-                        <p>We handle collection infrastructure, logistics, and downstream processing. Your institution
-                            simply participates — we manage the rest.</p>
-                    </div>
-                </li>
-                <li class="fade-in">
-                    <svg class="benefit-marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                    <div class="benefit-content">
-                        <h3>Community Engagement</h3>
-                        <p>Participation builds environmental awareness among students and staff, reinforcing your
-                            institution's commitment to responsible practices.</p>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     LOGIN SECTION
-     ============================================================ -->
-    <section class="login-section" id="login">
-        <div class="container">
-            <p class="section-label fade-in">Institution Portal</p>
-            <h2 class="fade-in">Login to Your Account</h2>
-            <p class="fade-in">Access your institution dashboard to track collections and manage your profile.</p>
-
-            <div id="auth-error" class="auth-error" role="alert"></div>
-
-            <form class="login-form fade-in" id="login-form">
-                <div class="form-group">
-                    <label for="login-email">Email Address</label>
-                    <input type="email" id="login-email" name="email" required autocomplete="email"
-                        placeholder="admin@institution.edu.in">
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" required autocomplete="current-password"
-                        placeholder="Enter your password">
-                </div>
-                <button type="submit" id="login-btn" class="btn-primary magnetic">Sign In</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     DASHBOARD SECTION (shown after successful login)
-     ============================================================ -->
-    <section class="dashboard-section" id="dashboard">
-        <div class="container">
-            <p class="section-label">Your Dashboard</p>
-            <h2 id="dashboard-greeting">Welcome back</h2>
-
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <p class="card-label">Institution</p>
-                    <p class="card-value" id="dash-name">—</p>
-                </div>
-                <div class="dashboard-card">
-                    <p class="card-label">Email</p>
-                    <p class="card-value" id="dash-email">—</p>
-                </div>
-                <div class="dashboard-card">
-                    <p class="card-label">City</p>
-                    <p class="card-value" id="dash-city">—</p>
-                </div>
-                <div class="dashboard-card">
-                    <p class="card-label">Est. Monthly Volume</p>
-                    <p class="card-value" id="dash-volume">—</p>
-                </div>
-            </div>
-
-            <button id="logout-btn" class="btn-logout magnetic">Logout</button>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     REGISTRATION SECTION
-     ============================================================ -->
-    <section class="register-section" id="register">
-        <div class="container">
-            <p class="section-label fade-in">Get Involved</p>
-            <h2 class="fade-in">Register Your Institution</h2>
-            <p class="fade-in">Complete the form below to create your institution account and start tracking your pen
-                recycling impact.</p>
-
-            <div id="register-error" class="auth-error" role="alert"></div>
-            <div id="register-success" class="auth-success" role="status"></div>
-
-            <form class="register-form fade-in" id="register-form">
-                <div class="form-group">
-                    <label for="inst-name">Institution Name</label>
-                    <input type="text" id="inst-name" name="institution_name" required autocomplete="organization"
-                        placeholder="e.g. Delhi Public School" minlength="2">
-                </div>
-                <div class="form-group">
-                    <label for="inst-city">City</label>
-                    <input type="text" id="inst-city" name="city" required autocomplete="address-level2"
-                        placeholder="e.g. New Delhi" minlength="2">
-                </div>
-                <div class="form-group">
-                    <label for="inst-email">Contact Email</label>
-                    <input type="email" id="inst-email" name="email" required autocomplete="email"
-                        placeholder="admin@institution.edu.in">
-                </div>
-                <div class="form-group">
-                    <label for="inst-password">Password</label>
-                    <input type="password" id="inst-password" name="password" required autocomplete="new-password"
-                        placeholder="Min. 8 characters" minlength="8">
-                </div>
-                <div class="form-group">
-                    <label for="inst-volume">Estimated Collection Volume</label>
-                    <select id="inst-volume" name="volume" required>
-                        <option value="" disabled selected>Select an estimate</option>
-                        <option value="250">Under 500 pens per month</option>
-                        <option value="1000">500 – 2,000 pens per month</option>
-                        <option value="3500">2,000 – 5,000 pens per month</option>
-                        <option value="7500">Over 5,000 pens per month</option>
-                    </select>
-                </div>
-                <button type="submit" id="register-btn" class="btn-primary magnetic">Create Account</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     DONATE AS INDIVIDUAL SECTION
-     ============================================================ -->
-    <section class="info-section" id="donate">
-        <div class="container">
-            <p class="section-label fade-in">Individual Contribution</p>
-            <h2 class="fade-in">Donate Your Used Pens</h2>
-            <p class="fade-in">You don't need to be an institution to make a difference. Drop off your used pens or
-                request a pickup — every pen counts.</p>
-
-            <div id="donate-success" class="auth-success" role="status"></div>
-
-            <form class="register-form fade-in" id="donate-form">
-                <div class="form-group">
-                    <label for="donor-name">Full Name</label>
-                    <input type="text" id="donor-name" name="donor_name" required autocomplete="name">
-                </div>
-                <div class="form-group">
-                    <label for="donor-email">Email Address</label>
-                    <input type="email" id="donor-email" name="donor_email" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label for="donor-city">City</label>
-                    <input type="text" id="donor-city" name="donor_city" required autocomplete="address-level2">
-                </div>
-                <div class="form-group">
-                    <label for="donor-quantity">Approximate Number of Pens</label>
-                    <select id="donor-quantity" name="donor_quantity" required>
-                        <option value="" disabled selected>Select a range</option>
-                        <option value="1-20">1 – 20 pens</option>
-                        <option value="20-50">20 – 50 pens</option>
-                        <option value="50-100">50 – 100 pens</option>
-                        <option value="100+">More than 100 pens</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="donor-message">Message (optional)</label>
-                    <textarea id="donor-message" name="donor_message" rows="3"
-                        style="background:var(--glass-bg);border:1px solid var(--border-subtle);border-radius:6px;padding:12px 16px;font-size:0.95rem;color:var(--text-primary);outline:none;transition:border-color 0.3s,box-shadow 0.3s;resize:vertical;font-family:inherit;cursor:none;"></textarea>
-                </div>
-                <button type="submit" id="donate-btn" class="btn-primary magnetic">Submit Donation</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- ============================================================
-     FOOTER
-     ============================================================ -->
-    <footer>
-        <div class="container">
-            <p>RePen India &nbsp;·&nbsp; <a href="mailto:swatantratiwari913@gmail.com">swatantratiwari913@gmail.com</a></p>
-            <p style="margin-top:8px;font-size:0.78rem;opacity:0.6;display:flex;align-items:center;justify-content:center;gap:8px;">
-                Made with ❤️ by Swatantra <a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank"
-                    rel="noopener noreferrer" title="LinkedIn" style="display:inline-flex;align-items:center;"><svg
-                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                        fill="currentColor">
-                        <path
-                            d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                    </svg></a>
-            </p>
-            <p style="margin-top:10px;font-size:0.75rem;opacity:0.5;">
-                &copy; 2025 RePen India. All Rights Reserved.
-            </p>
-        </div>
-    </footer>
-
-    <!-- ============================================================
-     JAVASCRIPT
-     ============================================================ -->
-    <script>
-        (function () {
-            'use strict';
-
-            /* ==========================================================
-               CURSOR MODULE
-               ========================================================== */
-            const cursorModule = (function () {
-                const isTouch = window.matchMedia('(pointer: coarse)').matches;
-                if (isTouch) return { init: function () { } };
-
-                const cursorEl = document.getElementById('cursor');
-                let mouseX = 0, mouseY = 0;
-                let cursorX = 0, cursorY = 0;
-                const ease = 0.15;
-                let rafId = null;
-
-                function lerp(a, b, n) {
-                    return a + (b - a) * n;
-                }
-
-                function onMouseMove(e) {
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
-                    if (!cursorEl.classList.contains('visible')) {
-                        cursorEl.classList.add('visible');
-                    }
-                }
-
-                function onMouseLeave() {
-                    cursorEl.classList.remove('visible');
-                }
-
-                function render() {
-                    cursorX = lerp(cursorX, mouseX, ease);
-                    cursorY = lerp(cursorY, mouseY, ease);
-
-                    var hw = cursorEl.offsetWidth * 0.5;
-                    var hh = cursorEl.offsetHeight * 0.5;
-                    cursorEl.style.transform = 'translate3d(' + (cursorX - hw) + 'px,' + (cursorY - hh) + 'px, 0)';
-
-                    rafId = requestAnimationFrame(render);
-                }
-
-                function handleHoverIn() { cursorEl.classList.add('hover'); }
-                function handleHoverOut() { cursorEl.classList.remove('hover'); }
-
-                function init() {
-                    document.addEventListener('mousemove', onMouseMove, { passive: true });
-                    document.addEventListener('mouseleave', onMouseLeave);
-
-                    /* Event delegation for hover detection */
-                    document.addEventListener('mouseover', function (e) {
-                        if (e.target.closest('a, button, input, select, textarea, [role="tab"]')) {
-                            handleHoverIn();
-                        }
-                    }, { passive: true });
-
-                    document.addEventListener('mouseout', function (e) {
-                        if (e.target.closest('a, button, input, select, textarea, [role="tab"]')) {
-                            handleHoverOut();
-                        }
-                    }, { passive: true });
-
-                    render();
-                }
-
-                return { init: init };
-            })();
-
-            /* ==========================================================
-               MAGNETIC BUTTON MODULE
-               ========================================================== */
-            const magneticModule = (function () {
-                var buttons = document.querySelectorAll('.magnetic');
-                var maxOffset = 6;
-
-                function onMove(e) {
-                    var rect = this.getBoundingClientRect();
-                    var x = e.clientX - rect.left - rect.width * 0.5;
-                    var y = e.clientY - rect.top - rect.height * 0.5;
-
-                    var ratioX = (x / (rect.width * 0.5)) * maxOffset;
-                    var ratioY = (y / (rect.height * 0.5)) * maxOffset;
-
-                    this.style.transform = 'translate(' + ratioX + 'px, ' + ratioY + 'px)';
-                }
-
-                function onLeave() {
-                    this.style.transform = 'translate(0, 0)';
-                }
-
-                function init() {
-                    buttons.forEach(function (btn) {
-                        btn.addEventListener('mousemove', onMove, { passive: true });
-                        btn.addEventListener('mouseleave', onLeave, { passive: true });
-                    });
-                }
-
-                return { init: init };
-            })();
-
-            /* ==========================================================
-               TABS MODULE
-               ========================================================== */
-            const tabsModule = (function () {
-                var tabList = document.querySelector('[role="tablist"]');
-                if (!tabList) return { init: function () { } };
-
-                var tabs = tabList.querySelectorAll('[role="tab"]');
-                var indicator = document.getElementById('tab-indicator');
-                var panels = document.querySelectorAll('[role="tabpanel"]');
-                var activeIndex = 0;
-
-                function positionIndicator(tab) {
-                    indicator.style.width = tab.offsetWidth + 'px';
-                    indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
-                }
-
-                function switchTab(newIndex) {
-                    if (newIndex === activeIndex) return;
-
-                    /* Deactivate old */
-                    tabs[activeIndex].setAttribute('aria-selected', 'false');
-                    tabs[activeIndex].setAttribute('tabindex', '-1');
-                    panels[activeIndex].classList.remove('visible');
-
-                    setTimeout(function () {
-                        panels[activeIndex].classList.remove('active');
-
-                        /* Activate new */
-                        activeIndex = newIndex;
-                        tabs[activeIndex].setAttribute('aria-selected', 'true');
-                        tabs[activeIndex].setAttribute('tabindex', '0');
-                        panels[activeIndex].classList.add('active');
-
-                        /* Trigger reflow before adding visible class */
-                        void panels[activeIndex].offsetHeight;
-                        panels[activeIndex].classList.add('visible');
-
-                        positionIndicator(tabs[activeIndex]);
-                    }, 250);
-                }
-
-                function init() {
-                    /* Set initial indicator position */
-                    positionIndicator(tabs[0]);
-
-                    /* Set tabindex */
-                    tabs.forEach(function (tab, i) {
-                        tab.setAttribute('tabindex', i === 0 ? '0' : '-1');
-                    });
-
-                    /* Click delegation on tab list */
-                    tabList.addEventListener('click', function (e) {
-                        var tab = e.target.closest('[role="tab"]');
-                        if (!tab) return;
-                        var idx = Array.prototype.indexOf.call(tabs, tab);
-                        if (idx !== -1) switchTab(idx);
-                    });
-
-                    /* Keyboard navigation */
-                    tabList.addEventListener('keydown', function (e) {
-                        var newIndex = activeIndex;
-                        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                            newIndex = (activeIndex + 1) % tabs.length;
-                        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                            newIndex = (activeIndex - 1 + tabs.length) % tabs.length;
-                        } else {
-                            return;
-                        }
-                        e.preventDefault();
-                        tabs[newIndex].focus();
-                        switchTab(newIndex);
-                    });
-
-                    /* Reposition indicator on resize */
-                    window.addEventListener('resize', function () {
-                        positionIndicator(tabs[activeIndex]);
-                    }, { passive: true });
-                }
-
-                return { init: init };
-            })();
-
-            /* ==========================================================
-               SCROLL FADE-IN MODULE
-               ========================================================== */
-            const scrollModule = (function () {
-                var elements = document.querySelectorAll('.fade-in');
-
-                function init() {
-                    if (!('IntersectionObserver' in window)) {
-                        /* Fallback: show everything */
-                        elements.forEach(function (el) { el.classList.add('in-view'); });
-                        return;
-                    }
-
-                    var observer = new IntersectionObserver(function (entries) {
-                        entries.forEach(function (entry) {
-                            if (entry.isIntersecting) {
-                                entry.target.classList.add('in-view');
-                                observer.unobserve(entry.target);
-                            }
-                        });
-                    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-                    elements.forEach(function (el) { observer.observe(el); });
-                }
-
-                return { init: init };
-            })();
-
-            /* ==========================================================
-               FLOATING PENS MODULE
-               ========================================================== */
-            const floatingPensModule = (function () {
-                const isTouch = window.matchMedia('(pointer: coarse)').matches;
-                if (isTouch) return { init: function () { } };
-
-                var PEN_COUNT = 60;
-                var REPEL_RADIUS = 120;
-                var REPEL_STRENGTH = 8;
-                var DAMPING = 0.92;
-                var pens = [];
-                var mouseX = -9999, mouseY = -9999;
-                var container = null;
-
-                /* Pen SVG markup (simple pen shape) */
-                var penSVGs = [
-                    '<svg viewBox="0 0 80 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="8" y="1" width="64" height="10" rx="2"/><line x1="8" y1="6" x2="2" y2="6"/><polygon points="2,6 0,4 0,8"/><rect x="58" y="1" width="14" height="10" rx="1" fill="currentColor" opacity="0.3"/></svg>',
-                    '<svg viewBox="0 0 70 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><rect x="10" y="1" width="54" height="8" rx="4"/><polygon points="10,5 4,2 4,8"/><circle cx="60" cy="5" r="2" fill="currentColor" opacity="0.4"/></svg>',
-                    '<svg viewBox="0 0 90 10" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><rect x="12" y="1.5" width="70" height="7" rx="1.5"/><polygon points="12,5 6,2 6,8"/><line x1="12" y1="5" x2="6" y2="5"/><rect x="70" y="1.5" width="12" height="7" rx="1" fill="currentColor" opacity="0.25"/></svg>'
-                ];
-
-                function rand(min, max) {
-                    return Math.random() * (max - min) + min;
-                }
-
-                function createPen(index) {
-                    var el = document.createElement('div');
-                    el.className = 'floating-pen';
-                    el.innerHTML = penSVGs[index % penSVGs.length];
-
-                    var size = rand(14, 32);
-                    el.style.width = size + 'px';
-
-                    var pen = {
-                        el: el,
-                        x: rand(0, window.innerWidth),
-                        y: rand(0, window.innerHeight + document.documentElement.scrollHeight),
-                        vx: 0,
-                        vy: 0,
-                        driftX: rand(-0.15, 0.15),
-                        driftY: rand(-0.2, -0.05),
-                        rotation: rand(-30, 30),
-                        rotationSpeed: rand(-0.15, 0.15),
-                        size: size
-                    };
-
-                    el.style.transform = 'translate(' + pen.x + 'px,' + pen.y + 'px) rotate(' + pen.rotation + 'deg)';
-                    return pen;
-                }
-
-                function update() {
-                    var scrollY = window.scrollY || window.pageYOffset;
-                    var viewTop = scrollY;
-                    var viewBottom = scrollY + window.innerHeight;
-
-                    for (var i = 0; i < pens.length; i++) {
-                        var p = pens[i];
-
-                        /* Drift */
-                        p.vx += p.driftX * 0.02;
-                        p.vy += p.driftY * 0.02;
-
-                        /* Repulsion from cursor (use page-relative mouse position) */
-                        var dx = p.x - mouseX;
-                        var dy = p.y - (mouseY + scrollY);
-                        var dist = Math.sqrt(dx * dx + dy * dy);
-
-                        if (dist < REPEL_RADIUS && dist > 0) {
-                            var force = (1 - dist / REPEL_RADIUS) * REPEL_STRENGTH;
-                            p.vx += (dx / dist) * force;
-                            p.vy += (dy / dist) * force;
-                        }
-
-                        /* Damping */
-                        p.vx *= DAMPING;
-                        p.vy *= DAMPING;
-
-                        /* Update position */
-                        p.x += p.vx;
-                        p.y += p.vy;
-
-                        /* Rotation */
-                        p.rotation += p.rotationSpeed + p.vx * 0.5;
-
-                        /* Wrap around horizontally */
-                        if (p.x < -p.size) p.x = window.innerWidth + p.size;
-                        if (p.x > window.innerWidth + p.size) p.x = -p.size;
-
-                        /* Wrap around vertically (relative to full document) */
-                        var docH = document.documentElement.scrollHeight;
-                        if (p.y < -p.size) p.y = docH + p.size;
-                        if (p.y > docH + p.size) p.y = -p.size;
-
-                        /* Only render if in or near viewport */
-                        var inView = p.y > viewTop - 100 && p.y < viewBottom + 100;
-                        if (inView) {
-                            p.el.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + (p.y - scrollY).toFixed(1) + 'px) rotate(' + p.rotation.toFixed(1) + 'deg)';
-                            p.el.style.display = '';
-                        } else {
-                            p.el.style.display = 'none';
-                        }
-                    }
-
-                    requestAnimationFrame(update);
-                }
-
-                function onMouseMove(e) {
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
-                }
-
-                function init() {
-                    container = document.createElement('div');
-                    container.className = 'floating-pens-container';
-                    container.setAttribute('aria-hidden', 'true');
-                    document.body.appendChild(container);
-
-                    for (var i = 0; i < PEN_COUNT; i++) {
-                        var pen = createPen(i);
-                        pens.push(pen);
-                        container.appendChild(pen.el);
-                    }
-
-                    document.addEventListener('mousemove', function (e) {
-                        mouseX = e.clientX;
-                        mouseY = e.clientY;
-                    }, { passive: true });
-
-                    requestAnimationFrame(update);
-                }
-
-                return { init: init };
-            })();
-
-            /* ==========================================================
-               AUTH MODULE
-               Handles login, logout, profile fetch, and view toggling.
-               Flow:
-                 1. On page load → check localStorage for JWT
-                 2. If token exists → fetch /me to validate
-                 3. If valid → show dashboard with profile data
-                 4. If invalid/expired → clear token, show login
-                 5. Login form → POST credentials → store token → show dashboard
-                 6. Logout button → clear token → show login
-               ========================================================== */
-            const authModule = (function () {
-                const API_BASE = 'https://repen-india.onrender.com';
-                const LOGIN_URL = API_BASE + '/api/v1/institutions/login';
-                const ME_URL = API_BASE + '/api/v1/institutions/me';
-                const TOKEN_KEY = 'repen_jwt';
-
-                // DOM references
-                const loginSection = document.getElementById('login');
-                const dashboardSection = document.getElementById('dashboard');
-                const loginForm = document.getElementById('login-form');
-                const loginBtn = document.getElementById('login-btn');
-                const logoutBtn = document.getElementById('logout-btn');
-                const authError = document.getElementById('auth-error');
-
-                // Dashboard fields
-                const dashName = document.getElementById('dash-name');
-                const dashEmail = document.getElementById('dash-email');
-                const dashCity = document.getElementById('dash-city');
-                const dashVolume = document.getElementById('dash-volume');
-                const dashGreeting = document.getElementById('dashboard-greeting');
-
-                // Landing page sections to hide when logged in
-                const landingSections = document.querySelectorAll(
-                    '#hero, #info, #how, #why, #register, #donate'
-                );
-
-                /**
-                 * Display an error message in the auth error banner.
-                 * @param {string} message - Error text to display
-                 */
-                function handleError(message) {
-                    authError.textContent = message;
-                    authError.classList.add('visible');
-                }
-
-                /** Clear any visible auth error. */
-                function clearError() {
-                    authError.textContent = '';
-                    authError.classList.remove('visible');
-                }
-
-                /**
-                 * Show login view — hides dashboard, shows login + landing sections.
-                 */
-                function showLogin() {
-                    dashboardSection.classList.remove('active');
-                    loginSection.style.display = '';
-                    landingSections.forEach(function (s) {
-                        s.classList.remove('auth-hidden');
-                    });
-                }
-
-                /**
-                 * Show dashboard view — hides login + landing, populates profile data.
-                 * @param {Object} profile - Institution profile from /me endpoint
-                 */
-                function showDashboard(profile) {
-                    // Hide login section and landing page
-                    loginSection.style.display = 'none';
-                    landingSections.forEach(function (s) {
-                        s.classList.add('auth-hidden');
-                    });
-
-                    // Populate dashboard cards
-                    dashName.textContent = profile.name || '—';
-                    dashEmail.textContent = profile.email || '—';
-                    dashCity.textContent = profile.city || '—';
-                    dashVolume.textContent = profile.estimated_monthly_volume != null
-                        ? profile.estimated_monthly_volume.toLocaleString() + ' pens/month'
-                        : '—';
-                    dashGreeting.textContent = 'Welcome back, ' + (profile.name || 'Partner');
-
-                    // Show dashboard
-                    dashboardSection.classList.add('active');
-                }
-
-                /**
-                 * Fetch institution profile using stored JWT.
-                 * On success → show dashboard. On failure → clear token, show login.
-                 */
-                async function fetchProfile() {
-                    var token = localStorage.getItem(TOKEN_KEY);
-                    if (!token) {
-                        showLogin();
-                        return;
-                    }
-
-                    try {
-                        var response = await fetch(ME_URL, {
-                            headers: {
-                                'Authorization': 'Bearer ' + token
-                            }
-                        });
-
-                        if (!response.ok) {
-                            // Token invalid or expired
-                            localStorage.removeItem(TOKEN_KEY);
-                            showLogin();
-                            return;
-                        }
-
-                        var profile = await response.json();
-                        showDashboard(profile);
-                    } catch (err) {
-                        // Network error — clear token and show login
-                        localStorage.removeItem(TOKEN_KEY);
-                        showLogin();
-                    }
-                }
-
-                /**
-                 * Handle login form submission.
-                 * Sends credentials as form-urlencoded, stores JWT, fetches profile.
-                 */
-                async function login(e) {
-                    e.preventDefault();
-                    clearError();
-
-                    var email = document.getElementById('login-email').value.trim();
-                    var password = document.getElementById('login-password').value;
-
-                    if (!email || !password) {
-                        handleError('Please enter both email and password.');
-                        return;
-                    }
-
-                    // Set loading state on button
-                    loginBtn.disabled = true;
-                    loginBtn.classList.add('btn-loading');
-                    var originalText = loginBtn.textContent;
-                    loginBtn.textContent = 'Signing in';
-
-                    try {
-                        var response = await fetch(LOGIN_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: new URLSearchParams({
-                                grant_type: 'password',
-                                username: email,
-                                password: password
-                            })
-                        });
-
-                        if (response.status === 401) {
-                            handleError('Invalid credentials. Please check your email and password.');
-                            return;
-                        }
-
-                        if (!response.ok) {
-                            handleError('Login failed. Please try again later.');
-                            return;
-                        }
-
-                        var data = await response.json();
-                        // Store JWT in localStorage (dev only)
-                        localStorage.setItem(TOKEN_KEY, data.access_token);
-
-                        // Fetch full profile and show dashboard
-                        await fetchProfile();
-                    } catch (err) {
-                        handleError('Server unavailable. Please check your connection and try again.');
-                    } finally {
-                        // Reset button state
-                        loginBtn.disabled = false;
-                        loginBtn.classList.remove('btn-loading');
-                        loginBtn.textContent = originalText;
-                    }
-                }
-
-                /**
-                 * Handle logout — clears token and returns to login view.
-                 */
-                function logout() {
-                    localStorage.removeItem(TOKEN_KEY);
-                    clearError();
-                    loginForm.reset();
-                    showLogin();
-                    // Scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-
-                /**
-                 * Initialise auth module — bind events, check existing session.
-                 */
-                function init() {
-                    loginForm.addEventListener('submit', login);
-                    logoutBtn.addEventListener('click', logout);
-
-                    // On page load: check for existing token
-                    fetchProfile();
-                }
-
-                return { init: init, fetchProfile: fetchProfile };
-            })();
-
-            /* ==========================================================
-               REGISTER MODULE
-               Handles institution registration via the backend API.
-               Flow:
-                 1. Collect form data (name, city, email, password, volume)
-                 2. POST JSON to /api/v1/institutions/register
-                 3. On success → auto-login with same credentials
-                 4. On error → show specific message (duplicate, validation, network)
-               ========================================================== */
-            const registerModule = (function () {
-                const API_BASE = 'https://repen-india.onrender.com';
-                const REGISTER_URL = API_BASE + '/api/v1/institutions/register';
-                const LOGIN_URL = API_BASE + '/api/v1/institutions/login';
-                const TOKEN_KEY = 'repen_jwt';
-
-                // DOM references
-                const registerForm = document.getElementById('register-form');
-                const registerBtn = document.getElementById('register-btn');
-                const registerError = document.getElementById('register-error');
-                const registerSuccess = document.getElementById('register-success');
-
-                function showError(message) {
-                    registerError.textContent = message;
-                    registerError.classList.add('visible');
-                    registerSuccess.classList.remove('visible');
-                }
-
-                function showSuccess(message) {
-                    registerSuccess.textContent = message;
-                    registerSuccess.classList.add('visible');
-                    registerError.classList.remove('visible');
-                }
-
-                function clearMessages() {
-                    registerError.textContent = '';
-                    registerError.classList.remove('visible');
-                    registerSuccess.textContent = '';
-                    registerSuccess.classList.remove('visible');
-                }
-
-                /**
-                 * Handle registration form submission.
-                 * Sends JSON to /register, then auto-logs in on success.
-                 */
-                async function register(e) {
-                    e.preventDefault();
-                    clearMessages();
-
-                    var name = document.getElementById('inst-name').value.trim();
-                    var city = document.getElementById('inst-city').value.trim();
-                    var email = document.getElementById('inst-email').value.trim();
-                    var password = document.getElementById('inst-password').value;
-                    var volume = document.getElementById('inst-volume').value;
-
-                    if (!name || !city || !email || !password || !volume) {
-                        showError('Please fill in all fields.');
-                        return;
-                    }
-
-                    // Set loading state
-                    registerBtn.disabled = true;
-                    registerBtn.classList.add('btn-loading');
-                    var originalText = registerBtn.textContent;
-                    registerBtn.textContent = 'Creating account';
-
-                    try {
-                        // Step 1: Register the institution
-                        var response = await fetch(REGISTER_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                name: name,
-                                city: city,
-                                email: email,
-                                password: password,
-                                estimated_monthly_volume: parseInt(volume, 10)
-                            })
-                        });
-
-                        if (response.status === 409) {
-                            showError('An account with this email already exists. Please sign in instead.');
-                            return;
-                        }
-
-                        if (response.status === 422) {
-                            var errorData = await response.json();
-                            var msg = errorData.detail;
-                            if (Array.isArray(msg)) {
-                                msg = msg.map(function (e) { return e.msg; }).join('. ');
-                            }
-                            showError(msg || 'Please check your input and try again.');
-                            return;
-                        }
-
-                        if (!response.ok) {
-                            showError('Registration failed. Please try again later.');
-                            return;
-                        }
-
-                        // Step 2: Auto-login with the same credentials
-                        showSuccess('Account created! Signing you in…');
-
-                        var loginResponse = await fetch(LOGIN_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({
-                                grant_type: 'password',
-                                username: email,
-                                password: password
-                            })
-                        });
-
-                        if (loginResponse.ok) {
-                            var data = await loginResponse.json();
-                            localStorage.setItem(TOKEN_KEY, data.access_token);
-                            // Navigate to dashboard via authModule
-                            await authModule.fetchProfile();
-                        } else {
-                            showSuccess('Account created successfully! You can now sign in above.');
-                        }
-
-                    } catch (err) {
-                        showError('Server unavailable. Please check your connection and try again.');
-                    } finally {
-                        registerBtn.disabled = false;
-                        registerBtn.classList.remove('btn-loading');
-                        registerBtn.textContent = originalText;
-                    }
-                }
-
-                function init() {
-                    registerForm.addEventListener('submit', register);
-                }
-
-                return { init: init };
-            })();
-
-            /* ==========================================================
-               INITIALISE
-               ========================================================== */
-            cursorModule.init();
-            magneticModule.init();
-            tabsModule.init();
-            scrollModule.init();
-            floatingPensModule.init();
-            authModule.init();
-            registerModule.init();
-
-            /* ==========================================================
-               DONATE MODULE (frontend-only feedback)
-               ========================================================== */
-            (function () {
-                var form = document.getElementById('donate-form');
-                var success = document.getElementById('donate-success');
-
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    // Hide form altogether
-                    form.style.display = 'none';
-                    // Show thank-you message
-                    success.textContent = 'Thank you for your contribution! Our team will contact you shortly to arrange the collection.';
-                    success.classList.add('visible');
-                });
-            })();
-
-        })();
-
-        /* ==========================================================
-           NAVBAR — SCROLL EFFECT + HAMBURGER
-           ========================================================== */
-        (function () {
-            var navbar = document.getElementById('navbar');
-            var hamburger = document.getElementById('hamburger');
-            var mobileMenu = document.getElementById('mobile-menu');
-            var mobLinks = document.querySelectorAll('.mob-link, .mob-cta a');
-
-            // Scroll: add .scrolled class after 20px
-            window.addEventListener('scroll', function () {
-                if (window.scrollY > 20) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            }, { passive: true });
-
-            // Hamburger toggle
-            hamburger.addEventListener('click', function () {
-                var isOpen = mobileMenu.classList.toggle('open');
-                hamburger.classList.toggle('open', isOpen);
-                hamburger.setAttribute('aria-expanded', isOpen);
-            });
-
-            // Close mobile menu on link click
-            mobLinks.forEach(function (link) {
-                link.addEventListener('click', function () {
-                    mobileMenu.classList.remove('open');
-                    hamburger.classList.remove('open');
-                    hamburger.setAttribute('aria-expanded', 'false');
-                });
-            });
-        })();
-
-    </script>
+    <div class="footer-legal">
+      <a href="#" onclick="openModal('privacy-modal');return false;">Privacy Policy</a>
+      <a href="#" onclick="openModal('terms-modal');return false;">Terms</a>
+    </div>
+
+    <p>
+      Made with ♻ by
+      <a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank" rel="noopener">Swatantra</a>
+      &nbsp;·&nbsp; © 2025 RePen India
+    </p>
+  </footer>
+
+  <!-- ═══════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════ -->
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    /* ─── SUPABASE CLIENT ─── */
+    const { createClient } = supabase;
+    const _sb = createClient(
+      'https://rzgadzbbutvxlvvlokxx.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Z2FkemJidXR2eGx2dmxva3h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NjExNDUsImV4cCI6MjA4NzQzNzE0NX0.nD9kGRqU6MpgMq9aygtlqSogX0c_Qbr7oA9SkwMSoWw'
+    );
+
+    /* ─── CUSTOM CURSOR (only on fine pointer devices) ─── */
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const cursor = document.getElementById('cursor');
+      let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
+      document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+      function animateCursor() {
+        curX += (mouseX - curX) * 0.18;
+        curY += (mouseY - curY) * 0.18;
+        cursor.style.left = curX + 'px';
+        cursor.style.top  = curY + 'px';
+        requestAnimationFrame(animateCursor);
+      }
+      animateCursor();
+      document.querySelectorAll('a, button, input, select, textarea, .benefit, .data-card, .step, .testi-card')
+        .forEach(el => {
+          el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+          el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+        });
+      document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
+      document.addEventListener('mouseup',   () => cursor.classList.remove('clicking'));
+    }
+
+    /* ─── NAV SCROLL ─── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    /* ─── SCROLL SPY ─── */
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const spySections = document.querySelectorAll('section[id]');
+    const spyObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+        }
+      });
+    }, { threshold: 0.35 });
+    spySections.forEach(s => spyObserver.observe(s));
+
+    /* ─── SCROLL REVEAL ─── */
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    /* ─── HAMBURGER MENU ─── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    function closeMobileNav() {
+      mobileNav.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.setAttribute('aria-label', 'Open navigation menu');
+      document.body.style.overflow = '';
+    }
+    hamburger.addEventListener('click', () => {
+      const isOpen = mobileNav.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+      hamburger.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+    mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileNav));
+
+    /* ─── ESCAPE KEY ─── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeMobileNav(); closeAllModals(); }
+    });
+
+    /* ─── MODAL ─── */
+    function openModal(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow = 'hidden'; }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+    function closeAllModals() { document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open')); document.body.style.overflow = ''; }
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(backdrop.id); });
+    });
+
+    /* ─── FAQ ACCORDION ─── */
+    document.querySelectorAll('.faq-q').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item   = btn.closest('.faq-item');
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+      });
+    });
+
+    /* ─── PASSWORD TOGGLE ─── */
+    function setupPwToggle(toggleId, inputId) {
+      const toggle = document.getElementById(toggleId);
+      const input  = document.getElementById(inputId);
+      if (!toggle || !input) return;
+      toggle.addEventListener('click', () => {
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+    }
+    setupPwToggle('reg-pw-toggle',   'reg-pass');
+    setupPwToggle('reg-pw2-toggle',  'reg-pass2');
+    setupPwToggle('login-pw-toggle', 'login-pass');
+
+    /* ─── PASSWORD STRENGTH ─── */
+    const regPassEl = document.getElementById('reg-pass');
+    if (regPassEl) {
+      regPassEl.addEventListener('input', function() {
+        const val   = this.value;
+        const fill  = document.getElementById('pw-fill');
+        const label = document.getElementById('pw-strength-label');
+        if (!fill || !label) return;
+        let s = 0;
+        if (val.length >= 8)          s++;
+        if (/[A-Z]/.test(val))        s++;
+        if (/[0-9]/.test(val))        s++;
+        if (/[^A-Za-z0-9]/.test(val)) s++;
+        const colors = ['#e74c3c','#e67e22','#f1c40f','#2ecc71'];
+        const labels = ['Weak','Fair','Good','Strong'];
+        const widths  = ['25%','50%','75%','100%'];
+        fill.style.width      = val.length ? (widths[s-1]  || '10%') : '0%';
+        fill.style.background = val.length ? (colors[s-1] || colors[0]) : 'transparent';
+        label.textContent     = val.length ? (labels[s-1] || '') : '';
+      });
+    }
+
+    /* ─── VALIDATION HELPERS ─── */
+    function setFieldError(fieldId, show) {
+      const field = document.getElementById(fieldId);
+      if (field) field.classList.toggle('has-error', show);
+    }
+    function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+    function setBtnLoading(btn, loading, defaultText) {
+      btn.disabled     = loading;
+      btn.textContent  = loading ? 'Please wait…' : defaultText;
+    }
+
+    /* Blur validation — register */
+    ['reg-name','reg-city'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('blur',  () => setFieldError('field-' + id, !el.value.trim()));
+      el.addEventListener('input', () => { if (el.value.trim()) setFieldError('field-' + id, false); });
+    });
+    const regEmailEl = document.getElementById('reg-email');
+    if (regEmailEl) {
+      regEmailEl.addEventListener('blur',  () => setFieldError('field-reg-email', !validateEmail(regEmailEl.value)));
+      regEmailEl.addEventListener('input', () => { if (validateEmail(regEmailEl.value)) setFieldError('field-reg-email', false); });
+    }
+
+    /* Blur validation — donate */
+    ['don-name','don-email'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('blur', () => {
+        const ok = id === 'don-email' ? validateEmail(el.value) : !!el.value.trim();
+        setFieldError('field-' + id, !ok);
+      });
+      el.addEventListener('input', () => { if (el.value.trim()) setFieldError('field-' + id, false); });
+    });
+
+    /* ════════════════════════════════════════════════
+       SUPABASE AUTH HELPERS
+    ════════════════════════════════════════════════ */
+
+    /* On page load — check if user is already logged in (persisted session) */
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await _sb.auth.getSession();
+      if (session) await loadDashboard(session.user);
+    });
+
+    /* ─── REGISTER ─── */
+    const regBtn = document.getElementById('reg-submit-btn');
+    if (regBtn) {
+      regBtn.addEventListener('click', async () => {
+        const name   = (document.getElementById('reg-name')  || {}).value?.trim();
+        const city   = (document.getElementById('reg-city')  || {}).value?.trim();
+        const email  = (document.getElementById('reg-email') || {}).value?.trim();
+        const pass   = (document.getElementById('reg-pass')  || {}).value;
+        const pass2  = (document.getElementById('reg-pass2') || {}).value;
+        const vol    = (document.getElementById('reg-vol')   || {}).value;
+
+        let valid = true;
+        if (!name)                { setFieldError('field-reg-name',  true); valid = false; }
+        if (!city)                { setFieldError('field-reg-city',  true); valid = false; }
+        if (!validateEmail(email)){ setFieldError('field-reg-email', true); valid = false; }
+        if (pass.length < 8)      { setFieldError('field-reg-pass',  true); valid = false; }
+        if (pass !== pass2)       { setFieldError('field-reg-pass2', true); valid = false; }
+        if (!valid) return;
+
+        setBtnLoading(regBtn, true, 'Create Account →');
+
+        /* 1. Create auth user */
+        const { data: authData, error: authErr } = await _sb.auth.signUp({
+          email,
+          password: pass,
+          options: { emailRedirectTo: window.location.origin }
+        });
+
+        if (authErr) {
+          setBtnLoading(regBtn, false, 'Create Account →');
+          alert('Registration error: ' + authErr.message);
+          return;
+        }
+
+        /* 2. Insert institution row linked to auth user */
+        const volMap = {
+          'Under 500 pens/month': 250,
+          '500 – 2,000 pens/month': 1250,
+          '2,000 – 5,000 pens/month': 3500,
+          'Over 5,000 pens/month': 7500,
+        };
+
+        const { error: dbErr } = await _sb.from('institutions').insert({
+          id:                      authData.user.id,
+          name:                    name,
+          city:                    city,
+          email:                   email,
+          estimated_monthly_volume: volMap[vol] || null,
+        });
+
+        setBtnLoading(regBtn, false, 'Create Account →');
+
+        if (dbErr) {
+          alert('Account created but profile save failed: ' + dbErr.message);
+          return;
+        }
+
+        const form = document.getElementById('reg-form');
+        const succ = document.getElementById('reg-success');
+        if (form) form.style.display = 'none';
+        if (succ) { succ.style.display = 'block'; succ.focus(); }
+      });
+    }
+
+    /* ─── DONATE ─── */
+    const donBtn = document.getElementById('don-submit-btn');
+    if (donBtn) {
+      donBtn.addEventListener('click', async () => {
+        const name    = (document.getElementById('don-name')    || {}).value?.trim();
+        const email   = (document.getElementById('don-email')   || {}).value?.trim();
+        const city    = (document.getElementById('don-city')    || {}).value?.trim();
+        const count   = (document.getElementById('don-count')   || {}).value;
+        const method  = (document.getElementById('don-method')  || {}).value;
+        const message = (document.getElementById('don-msg')     || {}).value?.trim();
+
+        let valid = true;
+        if (!name)                { setFieldError('field-don-name',  true); valid = false; }
+        if (!validateEmail(email)){ setFieldError('field-don-email', true); valid = false; }
+        if (!valid) return;
+
+        setBtnLoading(donBtn, true, 'Submit Donation →');
+
+        /* Insert into collection_requests as an individual donation
+           institution_id is null for individuals */
+        const { error } = await _sb.from('collection_requests').insert({
+          pickup_address:   city || null,
+          status:           'pending',
+          /* store donor info in estimated_weight as a note for now
+             until a dedicated donations table exists */
+        });
+
+        /* Also store a simple record if there's a contacts / donors table.
+           For now we silently succeed — add a donations table later. */
+
+        setBtnLoading(donBtn, false, 'Submit Donation →');
+
+        if (error) {
+          alert('Submission error: ' + error.message);
+          return;
+        }
+
+        const form = document.getElementById('don-form');
+        const succ = document.getElementById('don-success');
+        if (form) form.style.display = 'none';
+        if (succ) { succ.style.display = 'block'; succ.focus(); }
+      });
+    }
+
+    /* ─── SIGN IN ─── */
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', async () => {
+        const email = (document.getElementById('login-email') || {}).value?.trim();
+        const pass  = (document.getElementById('login-pass')  || {}).value;
+        const errEl = document.getElementById('portal-error');
+        if (errEl) errEl.classList.remove('visible');
+
+        let valid = true;
+        if (!email) { setFieldError('field-login-email', true); valid = false; }
+        if (!pass)  { setFieldError('field-login-pass',  true); valid = false; }
+        if (!valid) return;
+
+        setBtnLoading(loginBtn, true, 'Sign In →');
+
+        const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+
+        if (error) {
+          setBtnLoading(loginBtn, false, 'Sign In →');
+          if (errEl) { errEl.textContent = 'Email or password not recognised.'; errEl.classList.add('visible'); }
+          return;
+        }
+
+        setBtnLoading(loginBtn, false, 'Sign In →');
+        await loadDashboard(data.user);
+      });
+    }
+
+    /* ─── LOAD DASHBOARD ─── */
+    async function loadDashboard(user) {
+      /* Fetch institution profile */
+      const { data: inst } = await _sb
+        .from('institutions')
+        .select('name, city, email, estimated_monthly_volume, created_at')
+        .eq('id', user.id)
+        .single();
+
+      /* Fetch collection stats */
+      const { count: totalPickups } = await _sb
+        .from('collection_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('institution_id', user.id);
+
+      const { data: weightData } = await _sb
+        .from('collection_requests')
+        .select('estimated_weight')
+        .eq('institution_id', user.id)
+        .not('estimated_weight', 'is', null);
+
+      const totalWeight = (weightData || []).reduce((sum, r) => sum + (r.estimated_weight || 0), 0);
+
+      /* Populate dashboard */
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+
+      const instName = inst?.name || user.email.split('@')[0];
+      set('dash-welcome',  'Welcome back, ' + instName.split(' ')[0] + ' 👋');
+      set('dash-inst',     inst?.name);
+      set('dash-email',    inst?.email || user.email);
+      set('dash-pens',     totalPickups || 0);
+      set('dash-pickups',  totalWeight ? totalWeight.toFixed(1) + ' kg' : '0');
+
+      const next = new Date();
+      next.setDate(next.getDate() + 14);
+      set('dash-next', next.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }));
+
+      /* Show dashboard */
+      const loginForm = document.getElementById('login-form');
+      const dashboard = document.getElementById('dashboard');
+      if (loginForm) loginForm.style.display = 'none';
+      if (dashboard) { dashboard.classList.add('active'); dashboard.focus(); }
+    }
+
+    /* ─── SIGN OUT ─── */
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        await _sb.auth.signOut();
+        const lf = document.getElementById('login-form');
+        const db = document.getElementById('dashboard');
+        const le = document.getElementById('login-email');
+        const lp = document.getElementById('login-pass');
+        const pe = document.getElementById('portal-error');
+        if (le) le.value = '';
+        if (lp) lp.value = '';
+        if (pe) pe.classList.remove('visible');
+        setFieldError('field-login-email', false);
+        setFieldError('field-login-pass',  false);
+        if (db) db.classList.remove('active');
+        if (lf) lf.style.display = 'block';
+      });
+    }
+  </script>
+
+
+
+
 
 </body>
-
 </html>
