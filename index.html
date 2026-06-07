@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="RePen India — We partner with schools, colleges, and organisations across India to collect used pens and channel them into responsible recycling." />
+  <meta name="description"
+    content="RePen India — We partner with schools, colleges, and organisations across India to collect used pens and channel them into responsible recycling." />
   <meta property="og:title" content="RePen India — Rethink the Pen. Reclaim the Plastic." />
   <meta property="og:description" content="Responsible pen recycling across India — one pen at a time." />
   <meta property="og:type" content="website" />
@@ -11,39 +13,41 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap"
+    rel="stylesheet" />
 
   <style>
     /* ══════════════════════════════════════════════
        DESIGN TOKENS
     ══════════════════════════════════════════════ */
     :root {
-      --surface:          #fdf9f0;
-      --surface-low:      #f7f3ea;
-      --surface-container:#f1eee5;
-      --surface-high:     #ece8df;
-      --surface-highest:  #e6e2d9;
-      --on-surface:       #1c1c16;
-      --on-surface-var:   #414942;
-      --outline:          #717971;
-      --outline-var:      #c1c9bf;
-      --primary:          #00361a;
-      --primary-container:#1a4d2e;
-      --on-primary:       #ffffff;
-      --on-primary-con:   #88bd95;
-      --secondary:        #3e6a00;
-      --secondary-con:    #b9f474;
+      --surface: #fdf9f0;
+      --surface-low: #f7f3ea;
+      --surface-container: #f1eee5;
+      --surface-high: #ece8df;
+      --surface-highest: #e6e2d9;
+      --on-surface: #1c1c16;
+      --on-surface-var: #414942;
+      --outline: #717971;
+      --outline-var: #c1c9bf;
+      --primary: #00361a;
+      --primary-container: #1a4d2e;
+      --on-primary: #ffffff;
+      --on-primary-con: #88bd95;
+      --secondary: #3e6a00;
+      --secondary-con: #b9f474;
       --on-secondary-con: #437000;
-      --tertiary:         #482500;
-      --tertiary-con:     #683800;
-      --on-tertiary-con:  #eda15b;
-      --error:            #ba1a1a;
-      --inverse-surface:  #31302b;
-      --inverse-on:       #f4f0e7;
-      --inverse-primary:  #9dd3aa;
+      --tertiary: #482500;
+      --tertiary-con: #683800;
+      --on-tertiary-con: #eda15b;
+      --error: #ba1a1a;
+      --inverse-surface: #31302b;
+      --inverse-on: #f4f0e7;
+      --inverse-primary: #9dd3aa;
 
       --ff-display: 'Playfair Display', Georgia, serif;
-      --ff-body:    'DM Sans', system-ui, sans-serif;
+      --ff-body: 'DM Sans', system-ui, sans-serif;
 
       --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
       --ease-standard: cubic-bezier(0.65, 0, 0.35, 1);
@@ -57,8 +61,18 @@
     /* ══════════════════════════════════════════════
        RESET & BASE
     ══════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; font-size: 16px; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
 
     body {
       font-family: var(--ff-body);
@@ -69,21 +83,43 @@
     }
 
     @media (pointer: fine) {
-      body { cursor: none; }
-      .cursor { display: block !important; }
+      body {
+        cursor: none;
+      }
+
+      .cursor {
+        display: block !important;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+
+      *,
+      *::before,
+      *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
       }
-      html { scroll-behavior: auto; }
-      .reveal { opacity: 1 !important; transform: none !important; }
+
+      html {
+        scroll-behavior: auto;
+      }
+
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+      }
     }
 
-    img { display: block; max-width: 100%; }
-    a   { color: inherit; text-decoration: none; }
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
     /* ── GRAIN TEXTURE OVERLAY ── */
     body::before {
@@ -99,22 +135,31 @@
     /* ── SKIP LINK ── */
     .skip-link {
       position: absolute;
-      top: -100%; left: 1rem;
-      background: var(--primary); color: var(--on-primary);
+      top: -100%;
+      left: 1rem;
+      background: var(--primary);
+      color: var(--on-primary);
       padding: 0.5rem 1rem;
       border-radius: 0 0 6px 6px;
-      font-size: 0.875rem; font-weight: 700;
-      text-decoration: none; z-index: 10000;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-decoration: none;
+      z-index: 10000;
       transition: top 0.2s;
     }
-    .skip-link:focus { top: 0; }
+
+    .skip-link:focus {
+      top: 0;
+    }
 
     /* ── CUSTOM CURSOR ── */
     .cursor {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 10px; height: 10px;
+      top: 0;
+      left: 0;
+      width: 10px;
+      height: 10px;
       background: var(--primary);
       border-radius: 50%;
       pointer-events: none;
@@ -122,8 +167,10 @@
       transition: transform 0.15s var(--ease-expo), width 0.2s var(--ease-expo), height 0.2s var(--ease-expo), background 0.2s;
       transform: translate(-50%, -50%);
     }
+
     .cursor.hovering {
-      width: 28px; height: 28px;
+      width: 28px;
+      height: 28px;
       background: var(--secondary-con);
       mix-blend-mode: multiply;
     }
@@ -133,7 +180,9 @@
     ══════════════════════════════════════════════ */
     #nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 1000;
       padding: 0 var(--margin-lg);
       height: 68px;
@@ -157,14 +206,23 @@
       align-items: center;
       gap: 10px;
     }
+
     .nav-logo-icon {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       background: var(--primary);
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
     }
-    .nav-logo-icon svg { width: 16px; height: 16px; fill: var(--secondary-con); }
+
+    .nav-logo-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--secondary-con);
+    }
 
     .nav-links {
       display: flex;
@@ -172,6 +230,7 @@
       gap: 2rem;
       list-style: none;
     }
+
     .nav-links a {
       font-size: 0.875rem;
       font-weight: 500;
@@ -180,16 +239,25 @@
       transition: color 0.2s;
       position: relative;
     }
+
     .nav-links a::after {
       content: '';
       position: absolute;
-      bottom: -3px; left: 0; right: 100%;
+      bottom: -3px;
+      left: 0;
+      right: 100%;
       height: 1px;
       background: var(--primary);
       transition: right 0.3s var(--ease-expo);
     }
-    .nav-links a:hover { color: var(--primary); }
-    .nav-links a:hover::after { right: 0; }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-links a:hover::after {
+      right: 0;
+    }
 
     .nav-cta {
       font-size: 0.8125rem;
@@ -202,7 +270,11 @@
       border-radius: 0.25rem;
       transition: background 0.2s, transform 0.2s;
     }
-    .nav-cta:hover { background: var(--primary-container); transform: translateY(-1px); }
+
+    .nav-cta:hover {
+      background: var(--primary-container);
+      transform: translateY(-1px);
+    }
 
     .hamburger {
       display: none;
@@ -213,19 +285,45 @@
       cursor: pointer;
       padding: 4px;
     }
+
     .hamburger span {
       display: block;
-      width: 22px; height: 1.5px;
+      width: 22px;
+      height: 1.5px;
       background: var(--primary);
       transition: transform 0.3s, opacity 0.3s;
     }
 
     @media (max-width: 767px) {
-      #nav { padding: 0 var(--margin-sm); }
-      .nav-links { display: none; position: absolute; top: 68px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--outline-var); padding: 1.5rem var(--margin-sm); flex-direction: column; align-items: flex-start; gap: 1.25rem; }
-      .nav-links.open { display: flex; }
-      .nav-cta { display: none; }
-      .hamburger { display: flex; }
+      #nav {
+        padding: 0 var(--margin-sm);
+      }
+
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 68px;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--outline-var);
+        padding: 1.5rem var(--margin-sm);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .nav-cta {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -236,11 +334,27 @@
       transform: translateY(28px);
       transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
     }
-    .reveal.visible { opacity: 1; transform: none; }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .reveal-delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .reveal-delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .reveal-delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    .reveal-delay-4 {
+      transition-delay: 0.4s;
+    }
 
     /* ══════════════════════════════════════════════
        SHARED LAYOUT UTILITIES
@@ -250,7 +364,12 @@
       margin: 0 auto;
       padding: 0 var(--margin-lg);
     }
-    @media (max-width: 767px) { .container { padding: 0 var(--margin-sm); } }
+
+    @media (max-width: 767px) {
+      .container {
+        padding: 0 var(--margin-sm);
+      }
+    }
 
     .overline {
       display: inline-block;
@@ -261,6 +380,7 @@
       color: var(--on-surface-var);
       margin-bottom: 0.75rem;
     }
+
     .overline-leaf {
       color: var(--secondary);
       border-left: 2px solid var(--secondary-con);
@@ -275,7 +395,11 @@
       letter-spacing: -0.02em;
       color: var(--primary);
     }
-    .section-h2 em { font-style: italic; color: var(--on-surface-var); }
+
+    .section-h2 em {
+      font-style: italic;
+      color: var(--on-surface-var);
+    }
 
     .section-body {
       font-size: 1.0625rem;
@@ -300,10 +424,12 @@
     .hero::after {
       content: '';
       position: absolute;
-      top: -120px; right: -180px;
-      width: 700px; height: 700px;
+      top: -120px;
+      right: -180px;
+      width: 700px;
+      height: 700px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(185,244,116,0.12) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(185, 244, 116, 0.12) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -326,18 +452,23 @@
       color: var(--primary);
       margin-bottom: 1.5rem;
     }
+
     .hero-h1 em {
       font-style: italic;
       color: var(--on-surface-var);
     }
+
     .hero-h1 .accent {
       display: inline-block;
       position: relative;
     }
+
     .hero-h1 .accent::after {
       content: '';
       position: absolute;
-      bottom: 4px; left: 0; right: 0;
+      bottom: 4px;
+      left: 0;
+      right: 0;
       height: 3px;
       background: var(--secondary-con);
       border-radius: 2px;
@@ -374,10 +505,11 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     }
+
     .btn-primary:hover {
       background: var(--primary-container);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,54,26,0.15);
+      box-shadow: 0 8px 24px rgba(0, 54, 26, 0.15);
     }
 
     .btn-ghost {
@@ -393,13 +525,14 @@
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      border: 1px solid rgba(0,54,26,0.3);
+      border: 1px solid rgba(0, 54, 26, 0.3);
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s, transform 0.2s;
     }
+
     .btn-ghost:hover {
       border-color: var(--primary);
-      background: rgba(0,54,26,0.04);
+      background: rgba(0, 54, 26, 0.04);
       transform: translateY(-2px);
     }
 
@@ -418,14 +551,18 @@
       position: relative;
       overflow: hidden;
     }
+
     .stat-card::before {
       content: '';
       position: absolute;
-      top: -20px; right: -20px;
-      width: 80px; height: 80px;
+      top: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: rgba(185,244,116,0.12);
+      background: rgba(185, 244, 116, 0.12);
     }
+
     .stat-card-num {
       font-family: var(--ff-display);
       font-size: 2.25rem;
@@ -434,6 +571,7 @@
       line-height: 1;
       margin-bottom: 0.375rem;
     }
+
     .stat-card-label {
       font-size: 0.8125rem;
       color: var(--on-primary-con);
@@ -444,16 +582,34 @@
       background: var(--surface-container);
       color: var(--on-surface);
     }
-    .stat-card.light .stat-card-num { color: var(--primary); }
-    .stat-card.light .stat-card-label { color: var(--on-surface-var); }
-    .stat-card.light::before { background: rgba(0,54,26,0.05); }
+
+    .stat-card.light .stat-card-num {
+      color: var(--primary);
+    }
+
+    .stat-card.light .stat-card-label {
+      color: var(--on-surface-var);
+    }
+
+    .stat-card.light::before {
+      background: rgba(0, 54, 26, 0.05);
+    }
 
     @media (max-width: 1023px) {
-      .hero { padding: 100px var(--margin-sm) 60px; }
-      .hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .hero {
+        padding: 100px var(--margin-sm) 60px;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
     }
+
     @media (max-width: 767px) {
-      .hero-stats { grid-template-columns: 1fr 1fr; }
+      .hero-stats {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -466,11 +622,13 @@
       padding: 0.875rem 0;
       white-space: nowrap;
     }
+
     .ticker-track {
       display: inline-flex;
       gap: 3rem;
       animation: ticker 28s linear infinite;
     }
+
     .ticker-track span {
       font-size: 0.8125rem;
       font-weight: 700;
@@ -478,12 +636,19 @@
       text-transform: uppercase;
       flex-shrink: 0;
     }
+
     .ticker-track .dot {
-      color: rgba(185,244,116,0.4);
+      color: rgba(185, 244, 116, 0.4);
     }
+
     @keyframes ticker {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -494,40 +659,59 @@
       background: var(--inverse-surface);
       color: var(--inverse-on);
     }
+
     .problem .container {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 5rem;
       align-items: center;
     }
-    .problem .section-h2 { color: var(--inverse-on); }
-    .problem .section-h2 em { color: var(--on-primary-con); }
-    .problem .section-body { color: rgba(244,240,231,0.72); }
-    .problem .overline { color: var(--on-primary-con); }
+
+    .problem .section-h2 {
+      color: var(--inverse-on);
+    }
+
+    .problem .section-h2 em {
+      color: var(--on-primary-con);
+    }
+
+    .problem .section-body {
+      color: rgba(244, 240, 231, 0.72);
+    }
+
+    .problem .overline {
+      color: var(--on-primary-con);
+    }
 
     .problem-metrics {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
+
     .metric-row {
       display: flex;
       align-items: center;
       gap: 1.25rem;
       padding: 1.25rem;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 0.375rem;
       backdrop-filter: blur(8px);
     }
+
     .metric-icon {
-      width: 44px; height: 44px;
-      background: rgba(185,244,116,0.12);
+      width: 44px;
+      height: 44px;
+      background: rgba(185, 244, 116, 0.12);
       border-radius: 0.25rem;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       font-size: 1.25rem;
     }
+
     .metric-num {
       font-family: var(--ff-display);
       font-size: 1.5rem;
@@ -535,15 +719,19 @@
       color: var(--secondary-con);
       line-height: 1;
     }
+
     .metric-label {
       font-size: 0.8125rem;
-      color: rgba(244,240,231,0.6);
+      color: rgba(244, 240, 231, 0.6);
       line-height: 1.4;
       margin-top: 0.2rem;
     }
 
     @media (max-width: 1023px) {
-      .problem .container { grid-template-columns: 1fr; gap: 3rem; }
+      .problem .container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -553,10 +741,12 @@
       padding: 100px 0;
       background: var(--surface-low);
     }
+
     .how-head {
       text-align: center;
       margin-bottom: 4rem;
     }
+
     .steps {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -566,11 +756,13 @@
       border-radius: 0.5rem;
       overflow: hidden;
     }
+
     .step {
       background: var(--surface);
       padding: 2.5rem 2rem;
       position: relative;
     }
+
     .step-num {
       font-family: var(--ff-display);
       font-size: 3.5rem;
@@ -580,7 +772,11 @@
       margin-bottom: 1.25rem;
       transition: color 0.3s;
     }
-    .step:hover .step-num { color: var(--secondary-con); }
+
+    .step:hover .step-num {
+      color: var(--secondary-con);
+    }
+
     .step-title {
       font-family: var(--ff-display);
       font-size: 1.1875rem;
@@ -588,6 +784,7 @@
       color: var(--primary);
       margin-bottom: 0.625rem;
     }
+
     .step-body {
       font-size: 0.9375rem;
       color: var(--on-surface-var);
@@ -595,7 +792,9 @@
     }
 
     @media (max-width: 767px) {
-      .steps { grid-template-columns: 1fr; }
+      .steps {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -604,20 +803,24 @@
     .why {
       padding: 100px 0;
     }
+
     .why .container {
       display: grid;
       grid-template-columns: 5fr 7fr;
       gap: 5rem;
       align-items: start;
     }
+
     .why-sticky {
       position: sticky;
       top: 100px;
     }
+
     .why-cards {
       display: grid;
       gap: 1rem;
     }
+
     .why-card {
       padding: 1.75rem;
       border: 1px solid var(--surface-high);
@@ -628,18 +831,24 @@
       align-items: start;
       transition: border-color 0.25s, box-shadow 0.25s;
     }
+
     .why-card:hover {
       border-color: var(--outline-var);
-      box-shadow: 0 4px 20px rgba(0,54,26,0.06);
+      box-shadow: 0 4px 20px rgba(0, 54, 26, 0.06);
     }
+
     .why-card-icon {
-      width: 40px; height: 40px;
+      width: 40px;
+      height: 40px;
       background: var(--surface-container);
       border-radius: 0.25rem;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.125rem;
       flex-shrink: 0;
     }
+
     .why-card-title {
       font-family: var(--ff-display);
       font-size: 1.0625rem;
@@ -647,6 +856,7 @@
       color: var(--primary);
       margin-bottom: 0.375rem;
     }
+
     .why-card-body {
       font-size: 0.9375rem;
       color: var(--on-surface-var);
@@ -654,8 +864,14 @@
     }
 
     @media (max-width: 1023px) {
-      .why .container { grid-template-columns: 1fr; gap: 3rem; }
-      .why-sticky { position: static; }
+      .why .container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+
+      .why-sticky {
+        position: static;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -665,14 +881,17 @@
       padding: 100px 0;
       background: var(--surface-container);
     }
+
     .testimonials-head {
       margin-bottom: 3.5rem;
     }
+
     .testi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
     }
+
     .testi-card {
       background: var(--surface);
       border-radius: 0.5rem;
@@ -683,10 +902,12 @@
       border: 1px solid var(--surface-high);
       transition: transform 0.25s var(--ease-expo), box-shadow 0.25s;
     }
+
     .testi-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0,54,26,0.08);
+      box-shadow: 0 12px 40px rgba(0, 54, 26, 0.08);
     }
+
     .testi-quote {
       font-family: var(--ff-display);
       font-size: 1.0625rem;
@@ -695,18 +916,29 @@
       color: var(--primary);
       line-height: 1.5;
     }
-    .testi-quote::before { content: '\201C'; color: var(--secondary-con); font-size: 1.5em; line-height: 0; vertical-align: -0.35em; margin-right: 2px; }
+
+    .testi-quote::before {
+      content: '\201C';
+      color: var(--secondary-con);
+      font-size: 1.5em;
+      line-height: 0;
+      vertical-align: -0.35em;
+      margin-right: 2px;
+    }
+
     .testi-author {
       font-size: 0.8125rem;
       font-weight: 700;
       color: var(--on-surface-var);
       letter-spacing: 0.04em;
     }
+
     .testi-org {
       font-size: 0.8125rem;
       color: var(--outline);
       margin-top: 2px;
     }
+
     .testi-chip {
       display: inline-block;
       font-size: 0.6875rem;
@@ -714,16 +946,21 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       padding: 0.25rem 0.625rem;
-      background: rgba(72,37,0,0.08);
+      background: rgba(72, 37, 0, 0.08);
       color: var(--tertiary);
       border-radius: 9999px;
     }
 
     @media (max-width: 1023px) {
-      .testi-grid { grid-template-columns: 1fr 1fr; }
+      .testi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
+
     @media (max-width: 767px) {
-      .testi-grid { grid-template-columns: 1fr; }
+      .testi-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -732,10 +969,12 @@
     .join {
       padding: 100px 0;
     }
+
     .join-head {
       text-align: center;
       margin-bottom: 4rem;
     }
+
     .join-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -748,6 +987,7 @@
       border-radius: 0.5rem;
       padding: 2.5rem;
     }
+
     .form-panel-title {
       font-family: var(--ff-display);
       font-size: 1.375rem;
@@ -755,6 +995,7 @@
       color: var(--primary);
       margin-bottom: 0.375rem;
     }
+
     .form-panel-sub {
       font-size: 0.9375rem;
       color: var(--on-surface-var);
@@ -766,6 +1007,7 @@
     .field {
       margin-bottom: 1.125rem;
     }
+
     .field label {
       display: block;
       font-size: 0.75rem;
@@ -775,6 +1017,7 @@
       color: var(--on-surface-var);
       margin-bottom: 0.375rem;
     }
+
     .field input,
     .field select,
     .field textarea {
@@ -791,19 +1034,23 @@
       border-radius: 0;
       -webkit-appearance: none;
     }
+
     .field input:focus,
     .field select:focus,
     .field textarea:focus {
       border-bottom-color: var(--primary);
     }
+
     .field input::placeholder,
     .field textarea::placeholder {
       color: var(--outline);
     }
+
     .field textarea {
       resize: vertical;
       min-height: 80px;
     }
+
     .field select {
       cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23717971' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -817,27 +1064,40 @@
     .field.has-error textarea {
       border-bottom-color: var(--error);
     }
+
     .field-error {
       font-size: 0.75rem;
       color: var(--error);
       margin-top: 0.375rem;
       display: none;
     }
-    .field.has-error .field-error { display: block; }
+
+    .field.has-error .field-error {
+      display: block;
+    }
 
     /* Password row */
     .pw-row {
       position: relative;
     }
-    .pw-row input { padding-right: 2.5rem; }
+
+    .pw-row input {
+      padding-right: 2.5rem;
+    }
+
     .pw-toggle {
       position: absolute;
-      right: 0; top: 50%;
+      right: 0;
+      top: 50%;
       transform: translateY(-50%);
-      background: none; border: none; cursor: pointer;
-      color: var(--outline); padding: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--outline);
+      padding: 4px;
       display: flex;
     }
+
     .pw-strength-bar {
       height: 2px;
       background: var(--surface-high);
@@ -845,12 +1105,14 @@
       margin-top: 0.5rem;
       overflow: hidden;
     }
+
     .pw-strength-fill {
       height: 100%;
       width: 0%;
       border-radius: 2px;
       transition: width 0.3s, background 0.3s;
     }
+
     .pw-strength-label {
       font-size: 0.6875rem;
       font-weight: 700;
@@ -883,26 +1145,36 @@
       margin-top: 1.5rem;
       transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     }
+
     .submit-btn:hover:not(:disabled) {
       background: var(--primary-container);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(0,54,26,0.18);
+      box-shadow: 0 6px 20px rgba(0, 54, 26, 0.18);
     }
-    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     .form-success {
       display: none;
       text-align: center;
       padding: 2rem 0;
     }
+
     .form-success-icon {
-      width: 56px; height: 56px;
+      width: 56px;
+      height: 56px;
       background: var(--secondary-con);
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0 auto 1rem;
       font-size: 1.5rem;
     }
+
     .form-success h3 {
       font-family: var(--ff-display);
       font-size: 1.25rem;
@@ -910,13 +1182,16 @@
       color: var(--primary);
       margin-bottom: 0.5rem;
     }
+
     .form-success p {
       font-size: 0.9375rem;
       color: var(--on-surface-var);
     }
 
     @media (max-width: 1023px) {
-      .join-grid { grid-template-columns: 1fr; }
+      .join-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -926,18 +1201,20 @@
       padding: 100px 0;
       background: var(--surface-low);
     }
+
     .portal-head {
       text-align: center;
       margin-bottom: 3rem;
     }
+
     .portal-wrap {
       max-width: 520px;
       margin: 0 auto;
     }
 
     .portal-error {
-      background: rgba(186,26,26,0.08);
-      border: 1px solid rgba(186,26,26,0.2);
+      background: rgba(186, 26, 26, 0.08);
+      border: 1px solid rgba(186, 26, 26, 0.2);
       color: var(--error);
       font-size: 0.875rem;
       padding: 0.75rem 1rem;
@@ -945,13 +1222,19 @@
       margin-bottom: 1rem;
       display: none;
     }
-    .portal-error.visible { display: block; }
+
+    .portal-error.visible {
+      display: block;
+    }
 
     /* Dashboard */
     #dashboard {
       display: none;
     }
-    #dashboard.active { display: block; }
+
+    #dashboard.active {
+      display: block;
+    }
 
     .dash-welcome {
       font-family: var(--ff-display);
@@ -960,18 +1243,21 @@
       color: var(--primary);
       margin-bottom: 2rem;
     }
+
     .dash-cards {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
+
     .dash-card {
       background: var(--primary-container);
       color: var(--on-primary);
       border-radius: 0.5rem;
       padding: 1.5rem;
     }
+
     .dash-card-num {
       font-family: var(--ff-display);
       font-size: 2rem;
@@ -980,10 +1266,12 @@
       line-height: 1;
       margin-bottom: 0.375rem;
     }
+
     .dash-card-label {
       font-size: 0.8125rem;
       color: var(--on-primary-con);
     }
+
     .dash-info {
       background: var(--surface);
       border: 1px solid var(--surface-high);
@@ -991,6 +1279,7 @@
       padding: 1.75rem;
       margin-bottom: 1.5rem;
     }
+
     .dash-info-title {
       font-size: 0.75rem;
       font-weight: 700;
@@ -999,6 +1288,7 @@
       color: var(--on-surface-var);
       margin-bottom: 1rem;
     }
+
     .dash-info-row {
       display: flex;
       justify-content: space-between;
@@ -1006,9 +1296,19 @@
       border-bottom: 1px solid var(--surface-high);
       font-size: 0.9375rem;
     }
-    .dash-info-row:last-child { border-bottom: none; }
-    .dash-info-key { color: var(--on-surface-var); }
-    .dash-info-val { font-weight: 600; color: var(--primary); }
+
+    .dash-info-row:last-child {
+      border-bottom: none;
+    }
+
+    .dash-info-key {
+      color: var(--on-surface-var);
+    }
+
+    .dash-info-val {
+      font-weight: 600;
+      color: var(--primary);
+    }
 
     .logout-btn {
       display: inline-flex;
@@ -1016,7 +1316,7 @@
       gap: 0.5rem;
       padding: 0.625rem 1.25rem;
       background: transparent;
-      border: 1px solid rgba(0,54,26,0.25);
+      border: 1px solid rgba(0, 54, 26, 0.25);
       border-radius: 0.25rem;
       font-family: var(--ff-body);
       font-size: 0.8125rem;
@@ -1027,10 +1327,16 @@
       cursor: pointer;
       transition: border-color 0.2s, color 0.2s;
     }
-    .logout-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    .logout-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
 
     @media (max-width: 767px) {
-      .dash-cards { grid-template-columns: 1fr 1fr; }
+      .dash-cards {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -1039,23 +1345,28 @@
     .faq {
       padding: 100px 0;
     }
+
     .faq .container {
       display: grid;
       grid-template-columns: 5fr 7fr;
       gap: 5rem;
       align-items: start;
     }
+
     .faq-sticky {
       position: sticky;
       top: 100px;
     }
+
     .faq-list {
       display: flex;
       flex-direction: column;
     }
+
     .faq-item {
       border-bottom: 1px solid var(--surface-high);
     }
+
     .faq-q {
       display: flex;
       justify-content: space-between;
@@ -1073,28 +1384,50 @@
       color: var(--primary);
       transition: color 0.2s;
     }
-    .faq-q:hover { color: var(--primary-container); }
+
+    .faq-q:hover {
+      color: var(--primary-container);
+    }
+
     .faq-icon {
-      width: 22px; height: 22px;
+      width: 22px;
+      height: 22px;
       border: 1.5px solid var(--outline-var);
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       transition: background 0.25s, border-color 0.25s;
     }
+
     .faq-icon svg {
-      width: 10px; height: 10px;
+      width: 10px;
+      height: 10px;
       stroke: var(--outline);
       transition: transform 0.3s var(--ease-expo);
     }
-    .faq-item.open .faq-icon { background: var(--primary); border-color: var(--primary); }
-    .faq-item.open .faq-icon svg { stroke: var(--secondary-con); transform: rotate(45deg); }
+
+    .faq-item.open .faq-icon {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .faq-item.open .faq-icon svg {
+      stroke: var(--secondary-con);
+      transform: rotate(45deg);
+    }
+
     .faq-a {
       overflow: hidden;
       max-height: 0;
       transition: max-height 0.4s var(--ease-expo);
     }
-    .faq-item.open .faq-a { max-height: 300px; }
+
+    .faq-item.open .faq-a {
+      max-height: 300px;
+    }
+
     .faq-a p {
       padding-bottom: 1.25rem;
       font-size: 0.9375rem;
@@ -1103,8 +1436,14 @@
     }
 
     @media (max-width: 1023px) {
-      .faq .container { grid-template-columns: 1fr; gap: 2.5rem; }
-      .faq-sticky { position: static; }
+      .faq .container {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+
+      .faq-sticky {
+        position: static;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -1115,14 +1454,16 @@
       color: var(--inverse-on);
       padding: 64px 0 40px;
     }
+
     .footer-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
       gap: 3rem;
       padding-bottom: 3rem;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       margin-bottom: 2rem;
     }
+
     .footer-brand-name {
       font-family: var(--ff-display);
       font-size: 1.375rem;
@@ -1130,46 +1471,72 @@
       color: var(--inverse-on);
       margin-bottom: 0.75rem;
     }
+
     .footer-brand-tagline {
       font-size: 0.9375rem;
-      color: rgba(244,240,231,0.6);
+      color: rgba(244, 240, 231, 0.6);
       line-height: 1.6;
       max-width: 300px;
     }
+
     .footer-col-title {
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(244,240,231,0.4);
+      color: rgba(244, 240, 231, 0.4);
       margin-bottom: 1rem;
     }
-    .footer-links { display: flex; flex-direction: column; gap: 0.625rem; list-style: none; }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      list-style: none;
+    }
+
     .footer-links a {
       font-size: 0.9375rem;
-      color: rgba(244,240,231,0.7);
+      color: rgba(244, 240, 231, 0.7);
       transition: color 0.2s;
     }
-    .footer-links a:hover { color: var(--inverse-on); }
+
+    .footer-links a:hover {
+      color: var(--inverse-on);
+    }
+
     .footer-bottom {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 0.8125rem;
-      color: rgba(244,240,231,0.4);
+      color: rgba(244, 240, 231, 0.4);
     }
+
     .footer-bottom a {
-      color: rgba(244,240,231,0.4);
+      color: rgba(244, 240, 231, 0.4);
       transition: color 0.2s;
     }
-    .footer-bottom a:hover { color: rgba(244,240,231,0.8); }
+
+    .footer-bottom a:hover {
+      color: rgba(244, 240, 231, 0.8);
+    }
 
     @media (max-width: 767px) {
-      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
-      .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
     }
   </style>
 </head>
+
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
   <div class="cursor" id="cursor" aria-hidden="true"></div>
@@ -1178,7 +1545,9 @@
   <nav id="nav" aria-label="Main navigation">
     <a href="#hero" class="nav-logo" aria-label="RePen India home">
       <div class="nav-logo-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
+        </svg>
       </div>
       RePen India
     </a>
@@ -1206,7 +1575,8 @@
             <em>Reclaim the</em> <span class="accent">Plastic.</span>
           </h1>
           <p class="hero-sub reveal reveal-delay-2">
-            We partner with schools, colleges, and organisations across India to collect used pens and channel them into responsible recycling — one pen at a time.
+            We partner with schools, colleges, and organisations across India to collect used pens and channel them into
+            responsible recycling — one pen at a time.
           </p>
           <div class="hero-actions reveal reveal-delay-3">
             <a href="#register" class="btn-primary">Partner With Us →</a>
@@ -1261,10 +1631,13 @@
             Billions of pens.<br><em>No plan for them.</em>
           </h2>
           <p class="section-body reveal reveal-delay-2" style="margin-top:1.25rem">
-            India's education sector alone generates hundreds of millions of spent pens each year. Made from mixed plastics, these pens are rarely recyclable through conventional channels — and almost always end up in landfill or waterways.
+            India's education sector alone generates hundreds of millions of spent pens each year. Made from mixed
+            plastics, these pens are rarely recyclable through conventional channels — and almost always end up in
+            landfill or waterways.
           </p>
           <p class="section-body reveal reveal-delay-3" style="margin-top:1rem">
-            RePen India changes that by building the infrastructure for pen collection, processing, and responsible end-of-life management — starting with the institutions that generate the most.
+            RePen India changes that by building the infrastructure for pen collection, processing, and responsible
+            end-of-life management — starting with the institutions that generate the most.
           </p>
         </div>
         <div class="problem-metrics reveal reveal-delay-2">
@@ -1305,23 +1678,27 @@
       <div class="container">
         <div class="how-head">
           <span class="overline overline-leaf reveal">The Process</span>
-          <h2 class="section-h2 reveal reveal-delay-1" id="how-heading">Simple for you.<br><em>Meaningful for everyone.</em></h2>
+          <h2 class="section-h2 reveal reveal-delay-1" id="how-heading">Simple for you.<br><em>Meaningful for
+              everyone.</em></h2>
         </div>
         <div class="steps">
           <div class="step reveal">
             <div class="step-num">01</div>
             <div class="step-title">Register Your Institution</div>
-            <p class="step-body">Sign up in under two minutes. We work with schools, colleges, NGOs, corporates — any organisation that generates used pens.</p>
+            <p class="step-body">Sign up in under two minutes. We work with schools, colleges, NGOs, corporates — any
+              organisation that generates used pens.</p>
           </div>
           <div class="step reveal reveal-delay-1">
             <div class="step-num">02</div>
             <div class="step-title">Collect & Request Pickup</div>
-            <p class="step-body">Set up a collection bin. When it's full, log a pickup request through your dashboard. We handle the logistics.</p>
+            <p class="step-body">Set up a collection bin. When it's full, log a pickup request through your dashboard.
+              We handle the logistics.</p>
           </div>
           <div class="step reveal reveal-delay-2">
             <div class="step-num">03</div>
             <div class="step-title">We Process & Report</div>
-            <p class="step-body">Your pens are responsibly processed. You receive an impact report showing exactly how much plastic was diverted from landfill.</p>
+            <p class="step-body">Your pens are responsibly processed. You receive an impact report showing exactly how
+              much plastic was diverted from landfill.</p>
           </div>
         </div>
       </div>
@@ -1332,9 +1709,11 @@
       <div class="container">
         <div class="why-sticky">
           <span class="overline overline-leaf reveal">Why Partner</span>
-          <h2 class="section-h2 reveal reveal-delay-1" id="why-heading">Built for<br><em>institutions</em><br>like yours.</h2>
+          <h2 class="section-h2 reveal reveal-delay-1" id="why-heading">Built for<br><em>institutions</em><br>like
+            yours.</h2>
           <p class="section-body reveal reveal-delay-2" style="margin-top:1.25rem">
-            We've designed every part of the RePen experience around the realities of running a school, college, or NGO in India.
+            We've designed every part of the RePen experience around the realities of running a school, college, or NGO
+            in India.
           </p>
         </div>
         <div class="why-cards">
@@ -1342,35 +1721,40 @@
             <div class="why-card-icon">📦</div>
             <div>
               <div class="why-card-title">No Minimum Volume</div>
-              <p class="why-card-body">We work with small schools collecting 200 pens a month and large campuses with 10,000+. Pickup frequency is tailored to your volume.</p>
+              <p class="why-card-body">We work with small schools collecting 200 pens a month and large campuses with
+                10,000+. Pickup frequency is tailored to your volume.</p>
             </div>
           </div>
           <div class="why-card reveal reveal-delay-1">
             <div class="why-card-icon">🎖️</div>
             <div>
               <div class="why-card-title">Green Certification</div>
-              <p class="why-card-body">Partner institutions receive a RePen Green Partner certificate — shareable with students, parents, and stakeholders as proof of your sustainability commitment.</p>
+              <p class="why-card-body">Partner institutions receive a RePen Green Partner certificate — shareable with
+                students, parents, and stakeholders as proof of your sustainability commitment.</p>
             </div>
           </div>
           <div class="why-card reveal reveal-delay-2">
             <div class="why-card-icon">📊</div>
             <div>
               <div class="why-card-title">Real Impact Metrics</div>
-              <p class="why-card-body">Your dashboard tracks pens collected, plastic diverted, and CO₂ equivalent — concrete numbers for your annual sustainability report.</p>
+              <p class="why-card-body">Your dashboard tracks pens collected, plastic diverted, and CO₂ equivalent —
+                concrete numbers for your annual sustainability report.</p>
             </div>
           </div>
           <div class="why-card reveal reveal-delay-3">
             <div class="why-card-icon">🚀</div>
             <div>
               <div class="why-card-title">Zero Cost to You</div>
-              <p class="why-card-body">Partnering with RePen India is completely free for institutions. We cover logistics costs during our launch phase across Uttar Pradesh.</p>
+              <p class="why-card-body">Partnering with RePen India is completely free for institutions. We cover
+                logistics costs during our launch phase across Uttar Pradesh.</p>
             </div>
           </div>
           <div class="why-card reveal">
             <div class="why-card-icon">🤝</div>
             <div>
               <div class="why-card-title">Community of Change-Makers</div>
-              <p class="why-card-body">Join a growing network of institutions building India's first pen recycling supply chain. Early partners shape the program's direction.</p>
+              <p class="why-card-body">Join a growing network of institutions building India's first pen recycling
+                supply chain. Early partners shape the program's direction.</p>
             </div>
           </div>
         </div>
@@ -1387,7 +1771,8 @@
         <div class="testi-grid">
           <div class="testi-card reveal">
             <span class="testi-chip">School</span>
-            <p class="testi-quote">The process was seamless. Our students now see the pen collection bin every day and it's become a talking point for environmental education.</p>
+            <p class="testi-quote">The process was seamless. Our students now see the pen collection bin every day and
+              it's become a talking point for environmental education.</p>
             <div>
               <div class="testi-author">Priya Sharma</div>
               <div class="testi-org">Principal, Delhi Public School, Lucknow</div>
@@ -1395,7 +1780,8 @@
           </div>
           <div class="testi-card reveal reveal-delay-1">
             <span class="testi-chip">College</span>
-            <p class="testi-quote">We collected over 3,000 pens in the first month alone. The dashboard made it easy to report our impact to the management committee.</p>
+            <p class="testi-quote">We collected over 3,000 pens in the first month alone. The dashboard made it easy to
+              report our impact to the management committee.</p>
             <div>
               <div class="testi-author">Arun Mehta</div>
               <div class="testi-org">Sustainability Head, Amity University, Noida</div>
@@ -1403,7 +1789,8 @@
           </div>
           <div class="testi-card reveal reveal-delay-2">
             <span class="testi-chip">NGO</span>
-            <p class="testi-quote">Finally a practical way to address plastic waste at the source. RePen India filled a gap we've been trying to solve for years.</p>
+            <p class="testi-quote">Finally a practical way to address plastic waste at the source. RePen India filled a
+              gap we've been trying to solve for years.</p>
             <div>
               <div class="testi-author">Kavita Rao</div>
               <div class="testi-org">Director, GreenFuture Foundation</div>
@@ -1426,13 +1813,15 @@
           <div class="form-panel reveal" id="register">
             <div class="overline overline-leaf" style="margin-bottom:0.5rem">Institutions</div>
             <h3 class="form-panel-title">Partner With Us</h3>
-            <p class="form-panel-sub">Schools, colleges, NGOs, and corporates — register to set up a pen collection point at your campus.</p>
+            <p class="form-panel-sub">Schools, colleges, NGOs, and corporates — register to set up a pen collection
+              point at your campus.</p>
 
             <div id="reg-form">
               <div class="field-row">
                 <div class="field" id="field-reg-name">
                   <label for="reg-name">Institution Name</label>
-                  <input type="text" id="reg-name" placeholder="e.g. City Montessori School" autocomplete="organization" />
+                  <input type="text" id="reg-name" placeholder="e.g. City Montessori School"
+                    autocomplete="organization" />
                   <div class="field-error">Please enter your institution name.</div>
                 </div>
                 <div class="field" id="field-reg-city">
@@ -1443,7 +1832,8 @@
               </div>
               <div class="field" id="field-reg-email">
                 <label for="reg-email">Official Email</label>
-                <input type="email" id="reg-email" placeholder="principal@institution.edu.in" required aria-required="true" autocomplete="email" />
+                <input type="email" id="reg-email" placeholder="principal@institution.edu.in" required
+                  aria-required="true" autocomplete="email" />
                 <div class="field-error">Please enter a valid email address.</div>
               </div>
               <div class="field" id="field-reg-pass">
@@ -1451,19 +1841,30 @@
                 <div class="pw-row">
                   <input type="password" id="reg-pass" placeholder="Min. 8 characters" autocomplete="new-password" />
                   <button type="button" class="pw-toggle" id="reg-pw-toggle" aria-label="Show password">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="1.5">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
                   </button>
                 </div>
-                <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+                <div class="pw-strength-bar">
+                  <div class="pw-strength-fill" id="pw-fill"></div>
+                </div>
                 <div class="pw-strength-label" id="pw-strength-label" aria-live="polite"></div>
                 <div class="field-error">Password must be at least 8 characters.</div>
               </div>
               <div class="field" id="field-reg-pass2">
                 <label for="reg-pass2">Confirm Password</label>
                 <div class="pw-row">
-                  <input type="password" id="reg-pass2" placeholder="Re-enter your password" autocomplete="new-password" />
+                  <input type="password" id="reg-pass2" placeholder="Re-enter your password"
+                    autocomplete="new-password" />
                   <button type="button" class="pw-toggle" id="reg-pw2-toggle" aria-label="Show confirm password">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="1.5">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
                   </button>
                 </div>
                 <div class="field-error">Passwords do not match.</div>
@@ -1484,7 +1885,8 @@
             <div class="form-success" id="reg-success" aria-live="polite" tabindex="-1">
               <div class="form-success-icon">✓</div>
               <h3>You're on the list!</h3>
-              <p>Check your email to verify your account. We'll be in touch within 48 hours to set up your first pickup.</p>
+              <p>Check your email to verify your account. We'll be in touch within 48 hours to set up your first pickup.
+              </p>
             </div>
           </div>
 
@@ -1492,7 +1894,8 @@
           <div class="form-panel reveal reveal-delay-1" id="donate">
             <div class="overline overline-leaf" style="margin-bottom:0.5rem">Individuals</div>
             <h3 class="form-panel-title">Donate Your Pens</h3>
-            <p class="form-panel-sub">Not part of an institution? You can still contribute by sending us your used pens directly.</p>
+            <p class="form-panel-sub">Not part of an institution? You can still contribute by sending us your used pens
+              directly.</p>
 
             <div id="don-form">
               <div class="field-row">
@@ -1540,7 +1943,8 @@
             <div class="form-success" id="don-success" aria-live="polite" tabindex="-1">
               <div class="form-success-icon">🌿</div>
               <h3>Thank you!</h3>
-              <p>We've received your donation request and will send drop-off or pickup details to your email shortly.</p>
+              <p>We've received your donation request and will send drop-off or pickup details to your email shortly.
+              </p>
             </div>
           </div>
 
@@ -1554,7 +1958,8 @@
         <div class="portal-head">
           <span class="overline overline-leaf reveal">Institution Login</span>
           <h2 class="section-h2 reveal reveal-delay-1" id="portal-heading">Your <em>dashboard</em></h2>
-          <p class="section-body reveal reveal-delay-2" style="margin: 0.75rem auto 0; text-align:center">Track your collections, view pickups, and measure your environmental impact.</p>
+          <p class="section-body reveal reveal-delay-2" style="margin: 0.75rem auto 0; text-align:center">Track your
+            collections, view pickups, and measure your environmental impact.</p>
         </div>
 
         <div class="portal-wrap">
@@ -1571,7 +1976,10 @@
               <div class="pw-row">
                 <input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password" />
                 <button type="button" class="pw-toggle" id="login-pw-toggle" aria-label="Show password">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                 </button>
               </div>
               <div class="field-error">Please enter your password.</div>
@@ -1619,50 +2027,96 @@
         <div class="faq-sticky">
           <span class="overline overline-leaf reveal">FAQ</span>
           <h2 class="section-h2 reveal reveal-delay-1" id="faq-heading">Things people <em>ask</em></h2>
-          <p class="section-body reveal reveal-delay-2" style="margin-top:1.25rem">Can't find what you need? Email us at <a href="mailto:hello@repen-india.me" style="color:var(--primary);text-decoration:underline">hello@repen-india.me</a></p>
+          <p class="section-body reveal reveal-delay-2" style="margin-top:1.25rem">Can't find what you need? Email us at
+            <a href="mailto:hello@repen-india.me"
+              style="color:var(--primary);text-decoration:underline">hello@repen-india.me</a>
+          </p>
         </div>
         <div class="faq-list" role="list">
           <div class="faq-item" role="listitem">
             <button class="faq-q" aria-expanded="false">
               Is there a minimum pen count to register?
-              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg></span>
+              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5"
+                  stroke-linecap="round">
+                  <line x1="5" y1="2" x2="5" y2="8" />
+                  <line x1="2" y1="5" x2="8" y2="5" />
+                </svg></span>
             </button>
-            <div class="faq-a" id="faq-a1"><p>No minimum. We work with small schools collecting 200 pens a month and large campuses with 10,000+. Pickup frequency is tailored to your volume.</p></div>
+            <div class="faq-a" id="faq-a1">
+              <p>No minimum. We work with small schools collecting 200 pens a month and large campuses with 10,000+.
+                Pickup frequency is tailored to your volume.</p>
+            </div>
           </div>
           <div class="faq-item" role="listitem">
             <button class="faq-q" aria-expanded="false">
               What types of pens do you accept?
-              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg></span>
+              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5"
+                  stroke-linecap="round">
+                  <line x1="5" y1="2" x2="5" y2="8" />
+                  <line x1="2" y1="5" x2="8" y2="5" />
+                </svg></span>
             </button>
-            <div class="faq-a" id="faq-a2"><p>We accept ballpoint pens, gel pens, and marker pens of any brand. We currently do not process fountain pens or ink cartridges, but this is on our roadmap.</p></div>
+            <div class="faq-a" id="faq-a2">
+              <p>We accept ballpoint pens, gel pens, and marker pens of any brand. We currently do not process fountain
+                pens or ink cartridges, but this is on our roadmap.</p>
+            </div>
           </div>
           <div class="faq-item" role="listitem">
             <button class="faq-q" aria-expanded="false">
               How long does it take from registration to first pickup?
-              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg></span>
+              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5"
+                  stroke-linecap="round">
+                  <line x1="5" y1="2" x2="5" y2="8" />
+                  <line x1="2" y1="5" x2="8" y2="5" />
+                </svg></span>
             </button>
-            <div class="faq-a" id="faq-a3"><p>We aim to onboard new institutions within 5–7 business days. Our team will contact you after registration to confirm your collection setup and schedule the first pickup.</p></div>
+            <div class="faq-a" id="faq-a3">
+              <p>We aim to onboard new institutions within 5–7 business days. Our team will contact you after
+                registration to confirm your collection setup and schedule the first pickup.</p>
+            </div>
           </div>
           <div class="faq-item" role="listitem">
             <button class="faq-q" aria-expanded="false">
               Is the service free for institutions?
-              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg></span>
+              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5"
+                  stroke-linecap="round">
+                  <line x1="5" y1="2" x2="5" y2="8" />
+                  <line x1="2" y1="5" x2="8" y2="5" />
+                </svg></span>
             </button>
-            <div class="faq-a" id="faq-a4"><p>Yes — completely free during our launch phase. We cover all logistics costs for institutions across Uttar Pradesh. We are transparent about what happens when this changes.</p></div>
+            <div class="faq-a" id="faq-a4">
+              <p>Yes — completely free during our launch phase. We cover all logistics costs for institutions across
+                Uttar Pradesh. We are transparent about what happens when this changes.</p>
+            </div>
           </div>
           <div class="faq-item" role="listitem">
             <button class="faq-q" aria-expanded="false">
               Where are you currently operating?
-              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg></span>
+              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5"
+                  stroke-linecap="round">
+                  <line x1="5" y1="2" x2="5" y2="8" />
+                  <line x1="2" y1="5" x2="8" y2="5" />
+                </svg></span>
             </button>
-            <div class="faq-a" id="faq-a5"><p>We are currently active in Jaunpur and expanding across Uttar Pradesh. If you're outside this area, register anyway — we're prioritising expansion based on partner demand.</p></div>
+            <div class="faq-a" id="faq-a5">
+              <p>We are currently active in Jaunpur and expanding across Uttar Pradesh. If you're outside this area,
+                register anyway — we're prioritising expansion based on partner demand.</p>
+            </div>
           </div>
           <div class="faq-item" role="listitem">
             <button class="faq-q" aria-expanded="false">
               What happens to the pens after collection?
-              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg></span>
+              <span class="faq-icon" aria-hidden="true"><svg viewBox="0 0 10 10" fill="none" stroke-width="1.5"
+                  stroke-linecap="round">
+                  <line x1="5" y1="2" x2="5" y2="8" />
+                  <line x1="2" y1="5" x2="8" y2="5" />
+                </svg></span>
             </button>
-            <div class="faq-a" id="faq-a6"><p>Collected pens are disassembled, sorted by material type, and sent to certified plastic recyclers. The resulting plastic is reprocessed into raw material for manufacturing. We publish an annual transparency report.</p></div>
+            <div class="faq-a" id="faq-a6">
+              <p>Collected pens are disassembled, sorted by material type, and sent to certified plastic recyclers. The
+                resulting plastic is reprocessed into raw material for manufacturing. We publish an annual transparency
+                report.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1676,7 +2130,8 @@
       <div class="footer-grid">
         <div>
           <div class="footer-brand-name">RePen India</div>
-          <p class="footer-brand-tagline">Building India's first responsible pen recycling infrastructure — one institution at a time.</p>
+          <p class="footer-brand-tagline">Building India's first responsible pen recycling infrastructure — one
+            institution at a time.</p>
         </div>
         <div>
           <div class="footer-col-title">Navigate</div>
@@ -1691,14 +2146,16 @@
           <div class="footer-col-title">Connect</div>
           <ul class="footer-links">
             <li><a href="mailto:hello@repen-india.me">hello@repen-india.me</a></li>
-            <li><a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+            <li><a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank"
+                rel="noopener noreferrer">LinkedIn</a></li>
             <li><a href="#register">Register Institution</a></li>
             <li><a href="#donate">Donate Pens</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2025 RePen India. Built by <a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank" rel="noopener">Swatantra</a>.</span>
+        <span>© 2025 RePen India. Built by <a href="https://www.linkedin.com/in/swatantra-tiwarii" target="_blank"
+            rel="noopener">Swatantra</a>.</span>
         <span>Jaunpur, Uttar Pradesh, India</span>
       </div>
     </div>
@@ -1715,8 +2172,8 @@
     ═══════════════════════════════════════════════ */
     const { createClient } = supabase;
     const _sb = createClient(
-      'https://YOUR-NEW-PROJECT-ID.supabase.co',  // ← REPLACE
-      'YOUR-NEW-ANON-KEY'                          // ← REPLACE
+      'https://rzgadzbbutvxlvvlokxx.supabase.co',  // ← REPLACE
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Z2FkemJidXR2eGx2dmxva3h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NjExNDUsImV4cCI6MjA4NzQzNzE0NX0.nD9kGRqU6MpgMq9aygtlqSogX0c_Qbr7oA9SkwMSoWw'                          // ← REPLACE
     );
 
     /* ═══════════════════════════════════════════════
@@ -1726,7 +2183,7 @@
     if (cursor) {
       document.addEventListener('mousemove', e => {
         cursor.style.left = e.clientX + 'px';
-        cursor.style.top  = e.clientY + 'px';
+        cursor.style.top = e.clientY + 'px';
       });
       document.querySelectorAll('a, button, .faq-q, .why-card, .testi-card').forEach(el => {
         el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
@@ -1738,7 +2195,7 @@
        HAMBURGER MENU
     ═══════════════════════════════════════════════ */
     const hamburger = document.getElementById('hamburger');
-    const navLinks  = document.getElementById('nav-links');
+    const navLinks = document.getElementById('nav-links');
     if (hamburger && navLinks) {
       hamburger.addEventListener('click', () => {
         const open = navLinks.classList.toggle('open');
@@ -1759,7 +2216,7 @@
     ═══════════════════════════════════════════════ */
     document.querySelectorAll('.faq-q').forEach(btn => {
       btn.addEventListener('click', () => {
-        const item   = btn.closest('.faq-item');
+        const item = btn.closest('.faq-item');
         const isOpen = item.classList.contains('open');
         document.querySelectorAll('.faq-item').forEach(i => {
           i.classList.remove('open');
@@ -1774,7 +2231,7 @@
     ═══════════════════════════════════════════════ */
     function setupPwToggle(toggleId, inputId) {
       const toggle = document.getElementById(toggleId);
-      const input  = document.getElementById(inputId);
+      const input = document.getElementById(inputId);
       if (!toggle || !input) return;
       toggle.addEventListener('click', () => {
         const show = input.type === 'password';
@@ -1782,8 +2239,8 @@
         toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
       });
     }
-    setupPwToggle('reg-pw-toggle',   'reg-pass');
-    setupPwToggle('reg-pw2-toggle',  'reg-pass2');
+    setupPwToggle('reg-pw-toggle', 'reg-pass');
+    setupPwToggle('reg-pw2-toggle', 'reg-pass2');
     setupPwToggle('login-pw-toggle', 'login-pass');
 
     /* ═══════════════════════════════════════════════
@@ -1791,22 +2248,22 @@
     ═══════════════════════════════════════════════ */
     const regPassEl = document.getElementById('reg-pass');
     if (regPassEl) {
-      regPassEl.addEventListener('input', function() {
-        const val   = this.value;
-        const fill  = document.getElementById('pw-fill');
+      regPassEl.addEventListener('input', function () {
+        const val = this.value;
+        const fill = document.getElementById('pw-fill');
         const label = document.getElementById('pw-strength-label');
         if (!fill || !label) return;
         let s = 0;
-        if (val.length >= 8)          s++;
-        if (/[A-Z]/.test(val))        s++;
-        if (/[0-9]/.test(val))        s++;
+        if (val.length >= 8) s++;
+        if (/[A-Z]/.test(val)) s++;
+        if (/[0-9]/.test(val)) s++;
         if (/[^A-Za-z0-9]/.test(val)) s++;
-        const colors = ['#ba1a1a','#e67e22','#f1c40f','#9ed75b'];
-        const labels = ['Weak','Fair','Good','Strong'];
-        const widths = ['25%','50%','75%','100%'];
-        fill.style.width      = val.length ? (widths[s-1]  || '10%') : '0%';
-        fill.style.background = val.length ? (colors[s-1] || colors[0]) : 'transparent';
-        label.textContent     = val.length ? (labels[s-1] || '') : '';
+        const colors = ['#ba1a1a', '#e67e22', '#f1c40f', '#9ed75b'];
+        const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+        const widths = ['25%', '50%', '75%', '100%'];
+        fill.style.width = val.length ? (widths[s - 1] || '10%') : '0%';
+        fill.style.background = val.length ? (colors[s - 1] || colors[0]) : 'transparent';
+        label.textContent = val.length ? (labels[s - 1] || '') : '';
       });
     }
 
@@ -1819,25 +2276,25 @@
     }
     function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
     function setBtnLoading(btn, loading, defaultText) {
-      btn.disabled    = loading;
+      btn.disabled = loading;
       btn.textContent = loading ? 'Please wait…' : defaultText;
     }
 
     /* Blur validation — register */
-    ['reg-name','reg-city'].forEach(id => {
+    ['reg-name', 'reg-city'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      el.addEventListener('blur',  () => setFieldError('field-' + id, !el.value.trim()));
+      el.addEventListener('blur', () => setFieldError('field-' + id, !el.value.trim()));
       el.addEventListener('input', () => { if (el.value.trim()) setFieldError('field-' + id, false); });
     });
     const regEmailEl = document.getElementById('reg-email');
     if (regEmailEl) {
-      regEmailEl.addEventListener('blur',  () => setFieldError('field-reg-email', !validateEmail(regEmailEl.value)));
+      regEmailEl.addEventListener('blur', () => setFieldError('field-reg-email', !validateEmail(regEmailEl.value)));
       regEmailEl.addEventListener('input', () => { if (validateEmail(regEmailEl.value)) setFieldError('field-reg-email', false); });
     }
 
     /* Blur validation — donate */
-    ['don-name','don-email'].forEach(id => {
+    ['don-name', 'don-email'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('blur', () => {
@@ -1858,19 +2315,19 @@
     const regBtn = document.getElementById('reg-submit-btn');
     if (regBtn) {
       regBtn.addEventListener('click', async () => {
-        const name  = document.getElementById('reg-name')?.value?.trim();
-        const city  = document.getElementById('reg-city')?.value?.trim();
+        const name = document.getElementById('reg-name')?.value?.trim();
+        const city = document.getElementById('reg-city')?.value?.trim();
         const email = document.getElementById('reg-email')?.value?.trim();
-        const pass  = document.getElementById('reg-pass')?.value;
+        const pass = document.getElementById('reg-pass')?.value;
         const pass2 = document.getElementById('reg-pass2')?.value;
-        const vol   = document.getElementById('reg-vol')?.value;
+        const vol = document.getElementById('reg-vol')?.value;
 
         let valid = true;
-        if (!name)                { setFieldError('field-reg-name',  true); valid = false; }
-        if (!city)                { setFieldError('field-reg-city',  true); valid = false; }
-        if (!validateEmail(email)){ setFieldError('field-reg-email', true); valid = false; }
+        if (!name) { setFieldError('field-reg-name', true); valid = false; }
+        if (!city) { setFieldError('field-reg-city', true); valid = false; }
+        if (!validateEmail(email)) { setFieldError('field-reg-email', true); valid = false; }
         if (!pass || pass.length < 8) { setFieldError('field-reg-pass', true); valid = false; }
-        if (pass !== pass2)       { setFieldError('field-reg-pass2', true); valid = false; }
+        if (pass !== pass2) { setFieldError('field-reg-pass2', true); valid = false; }
         if (!valid) return;
 
         setBtnLoading(regBtn, true, 'Create Account →');
@@ -1915,13 +2372,13 @@
     const donBtn = document.getElementById('don-submit-btn');
     if (donBtn) {
       donBtn.addEventListener('click', async () => {
-        const name  = document.getElementById('don-name')?.value?.trim();
+        const name = document.getElementById('don-name')?.value?.trim();
         const email = document.getElementById('don-email')?.value?.trim();
-        const city  = document.getElementById('don-city')?.value?.trim();
+        const city = document.getElementById('don-city')?.value?.trim();
 
         let valid = true;
-        if (!name)                { setFieldError('field-don-name',  true); valid = false; }
-        if (!validateEmail(email)){ setFieldError('field-don-email', true); valid = false; }
+        if (!name) { setFieldError('field-don-name', true); valid = false; }
+        if (!validateEmail(email)) { setFieldError('field-don-email', true); valid = false; }
         if (!valid) return;
 
         setBtnLoading(donBtn, true, 'Submit Donation →');
@@ -1947,13 +2404,13 @@
     if (loginBtn) {
       loginBtn.addEventListener('click', async () => {
         const email = document.getElementById('login-email')?.value?.trim();
-        const pass  = document.getElementById('login-pass')?.value;
+        const pass = document.getElementById('login-pass')?.value;
         const errEl = document.getElementById('portal-error');
         if (errEl) errEl.classList.remove('visible');
 
         let valid = true;
         if (!email) { setFieldError('field-login-email', true); valid = false; }
-        if (!pass)  { setFieldError('field-login-pass',  true); valid = false; }
+        if (!pass) { setFieldError('field-login-pass', true); valid = false; }
         if (!valid) return;
 
         setBtnLoading(loginBtn, true, 'Sign In →');
@@ -1997,9 +2454,9 @@
 
       const instName = inst?.name || user.email.split('@')[0];
       set('dash-welcome', 'Welcome back, ' + instName.split(' ')[0] + ' 👋');
-      set('dash-inst',    inst?.name);
-      set('dash-email',   inst?.email || user.email);
-      set('dash-pens',    totalPickups || 0);
+      set('dash-inst', inst?.name);
+      set('dash-email', inst?.email || user.email);
+      set('dash-pens', totalPickups || 0);
       set('dash-pickups', totalWeight ? totalWeight.toFixed(1) + ' kg' : '0 kg');
 
       const next = new Date();
@@ -2019,14 +2476,15 @@
       logoutBtn.addEventListener('click', async () => {
         await _sb.auth.signOut();
         document.getElementById('login-email').value = '';
-        document.getElementById('login-pass').value  = '';
+        document.getElementById('login-pass').value = '';
         document.getElementById('portal-error').classList.remove('visible');
         setFieldError('field-login-email', false);
-        setFieldError('field-login-pass',  false);
+        setFieldError('field-login-pass', false);
         document.getElementById('dashboard').classList.remove('active');
         document.getElementById('login-form').style.display = 'block';
       });
     }
   </script>
 </body>
+
 </html>
