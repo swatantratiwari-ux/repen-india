@@ -10,6 +10,7 @@
   <meta property="og:description" content="Responsible pen recycling across India — one pen at a time." />
   <meta property="og:type" content="website" />
   <title>RePen India — Responsible Pen Recycling</title>
+  <link rel="icon" type="image/png" href="logo-icon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -205,6 +206,14 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo-img {
+      height: 42px;
+      width: auto;
+      object-fit: contain;
+      display: block;
     }
 
     .nav-logo-icon {
@@ -1544,12 +1553,7 @@
   <!-- ══ NAV ══ -->
   <nav id="nav" aria-label="Main navigation">
     <a href="#hero" class="nav-logo" aria-label="RePen India home">
-      <div class="nav-logo-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
-        </svg>
-      </div>
-      RePen India
+      <img src="logo-full.png" alt="RePen India" class="nav-logo-img" />
     </a>
     <ul class="nav-links" id="nav-links" role="list">
       <li><a href="#problem">The Problem</a></li>
@@ -2028,8 +2032,8 @@
           <span class="overline overline-leaf reveal">FAQ</span>
           <h2 class="section-h2 reveal reveal-delay-1" id="faq-heading">Things people <em>ask</em></h2>
           <p class="section-body reveal reveal-delay-2" style="margin-top:1.25rem">Can't find what you need? Email us at
-            <a href="mailto:hello@repen-india.me"
-              style="color:var(--primary);text-decoration:underline">hello@repen-india.me</a>
+            <a href="mailto:repenindia@gmail.com"
+              style="color:var(--primary);text-decoration:underline">repenindia@gmail.com</a>
           </p>
         </div>
         <div class="faq-list" role="list">
